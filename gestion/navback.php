@@ -13,6 +13,7 @@
                         <a href="upload_image.php" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-600 transition duration-300">Ajouter des images</a>
                         <a href="project.php" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-600 transition duration-300">Ajouter des projets</a>
                         <a href="gestion_cv.php" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-600 transition duration-300">Ajouter un CV</a>
+                        <a href="add_video.php" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-purple-600 transition duration-300">Ajouter une video</a>
                     </div>
                 </div>
                 <div class="ml-auto">

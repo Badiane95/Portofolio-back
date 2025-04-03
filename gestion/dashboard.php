@@ -147,59 +147,87 @@ while($row = $result_home_content->fetch_assoc()){
                     <?php endif; ?>
                 </div>
             </section>
- <section>
-              <!-- Section Gestion Vidéo -->
-  <div class="bg-white shadow-lg rounded-lg p-6 mb-8 border border-purple-200">
-    <h2 class="text-2xl font-bold text-purple-700 mb-4">Gestion des Vidéos</h2>
-    
-    <!-- Formulaire d'ajout -->
-    <form method="POST" action="video_operations.php" class="mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-purple-600 mb-2">Titre de la vidéo</label>
-                <input type="text" name="title" required 
-                    class="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500">
+            <section class="space-y-8">
+    <!-- Formulaire d'édition/ajout -->
+    <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl shadow-xl p-8 border border-purple-100">
+        <h2 class="text-2xl font-bold bg-purple-600 text-white px-4 py-3 rounded-t-lg -m-8 mb-6 shadow-md">
+            <?= isset($edit_video) ? 'Modifier la vidéo' : 'Ajouter une nouvelle vidéo' ?>
+        </h2>
+        
+        <form method="POST" action="video_operations.php" class="space-y-6">
+            <?php if (isset($edit_video)): ?>
+                <input type="hidden" name="id" value="<?= $edit_video['id'] ?>">
+            <?php endif; ?>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-purple-700">Titre de la vidéo</label>
+                    <input type="text" name="title" required 
+                        value="<?= isset($edit_video) ? htmlspecialchars($edit_video['title']) : '' ?>"
+                        class="w-full px-4 py-3 border-2 border-purple-100 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-purple-700">URL YouTube (embed)</label>
+                    <input type="url" name="video_url" 
+                        pattern="https://www\.youtube\.com/embed/.+" 
+                        value="<?= isset($edit_video) ? htmlspecialchars($edit_video['video_url']) : '' ?>"
+                        class="w-full px-4 py-3 border-2 border-purple-100 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                        placeholder="https://www.youtube.com/embed/ID_VIDEO">
+                </div>
             </div>
-            <div>
-                <label class="block text-purple-600 mb-2">URL YouTube (embed)</label>
-                <input type="url" name="video_url" pattern="https://www.youtube.com/embed/.+" required
-                    class="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
-                    placeholder="https://www.youtube.com/embed/ID_VIDEO">
-            </div>
-        </div>
-        <div class="mt-4">
-            <label class="block text-purple-600 mb-2">Description</label>
-            <textarea name="description" rows="3"
-                class="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"></textarea>
-        </div>
-        <button type="submit" name="add_video" 
-            class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
-            Ajouter la vidéo
-        </button>
-    </form>
 
-          <!-- Liste des vidéos -->
-<div class="space-y-4">
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-purple-700">Description</label>
+                <textarea name="description" rows="4"
+                    class="w-full px-4 py-3 border-2 border-purple-100 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"><?= 
+                        isset($edit_video) ? htmlspecialchars($edit_video['description']) : '' ?></textarea>
+            </div>
+
+            <button type="submit" name="<?= isset($edit_video) ? 'update_video' : 'add_video' ?>" 
+                class="w-full lg:w-auto px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all">
+                <?= isset($edit_video) ? 'Mettre à jour' : 'Ajouter la vidéo' ?>
+            </button>
+        </form>
+    </div>
+
+    <!-- Liste des vidéos -->
+<div class="space-y-6">
     <?php
     $videos = $conn->query("SELECT * FROM videos ORDER BY created_at DESC");
     while($video = $videos->fetch_assoc()):
     ?>
-    <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
-        <div class="flex items-center justify-between mb-2">
-            <h3 class="text-lg font-semibold text-purple-800"><?= htmlspecialchars($video['title']) ?></h3>
-            <div class="space-x-2">
-                <a href="video_operations.php?edit=<?= $video['id'] ?>" 
-                   class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600">Modifier</a>
-                <a href="video_operations.php?delete=<?= $video['id'] ?>" 
-                   class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                   onclick="return confirm('Supprimer cette vidéo ?')">Supprimer</a>
+    <div class="group bg-white hover:bg-purple-50 rounded-xl shadow-md hover:shadow-lg p-6 border-2 border-purple-50 transition-all">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+            <h3 class="text-lg font-bold text-purple-900 flex-1 truncate">
+                <?= htmlspecialchars($video['title']) ?>
+            </h3>
+            
+            <div class="flex gap-2">
+                <a href="edit_video.php?id=<?= $video['id'] ?>" 
+                   class="px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 rounded-lg border border-purple-200 transition-all">
+                   ✏️ Modifier
+                </a>
+                <a href="delete_video.php?id=<?= $video['id'] ?>" 
+                   class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-700 rounded-lg border border-red-200 transition-all"
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')">
+                   🗑️ Supprimer
+                </a>
             </div>
         </div>
-        <p class="text-purple-600 mb-2"><?= htmlspecialchars($video['description']) ?></p>
-        <div class="aspect-w-16 aspect-h-9">
+        
+        <?php if (!empty($video['description'])): ?>
+        <p class="text-purple-600 mb-4 text-sm leading-relaxed">
+            <?= nl2br(htmlspecialchars($video['description'])) ?>
+        </p>
+        <?php endif; ?>
+        
+        <div class="aspect-video rounded-xl overflow-hidden border-2 border-purple-100 bg-gray-50">
             <iframe src="<?= htmlspecialchars($video['video_url']) ?>" 
-                    class="w-full rounded-lg border border-purple-200"
-                    allowfullscreen></iframe>
+                class="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
         </div>
     </div>
     <?php endwhile; ?>

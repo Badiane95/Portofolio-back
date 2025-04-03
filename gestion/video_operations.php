@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Vérification d'authentification
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 include __DIR__ . '/../connexion/msql.php';
 
 // Ajout de vidéo
@@ -53,6 +60,6 @@ if(isset($_POST['update_video'])) {
         $_SESSION['error'] = "Erreur de mise à jour: " . $stmt->error;
     }
     $stmt->close();
-    header("Location: dashboard.php");
+    header("Location: dashboard.php"); // Redirection corrigée
     exit();
 }
