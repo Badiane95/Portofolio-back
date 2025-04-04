@@ -53,8 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_field'])) {
     
     <div class="max-w-3xl mx-auto py-8 px-4">
         <div class="bg-white shadow-xl rounded-lg p-8 border border-purple-100">
-            <h2 class="text-2xl font-bold text-purple-800 mb-6">Ajouter un nouveau champ</h2>
-            
+           <div class="p-8">
+                <h2 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-envelope mr-2"></i>Ajouter un nouveau champ
+                </h2>
             <form method="POST" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Nom du champ -->
@@ -126,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_field'])) {
                         </button>
                     </div>
                 </div>
+            </div>
             </form>
         </div>
     </div>

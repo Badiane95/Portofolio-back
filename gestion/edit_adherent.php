@@ -100,66 +100,74 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="shortcut icon" href="../images/favicon.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100">
-<?php include 'navback.php'; ?>
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
-            <div class="md:flex">
-                <div class="p-8 w-full">
-                    <h2 class="text-2xl font-bold text-purple-900 mb-6">Modifier un adhérent</h2>
-                    <form action="edit_adherent.php" method="POST" enctype="multipart/form-data">
-                        <div class="space-y-4">
-                            <!-- Photo actuelle -->
-                            <div class="text-center">
-                                <img src="<?= htmlspecialchars($adherent['profile_photo'] ?? '../images/default-avatar.png') ?>" 
-                                     alt="Photo actuelle" 
-                                     class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-purple-100">
-                                <label class="cursor-pointer inline-block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                                    Changer la photo
-                                    <input type="file" 
-                                           name="profile_photo" 
-                                           class="hidden" 
-                                           accept="image/*">
-                                </label>
-                            </div>
-                            
-                            <div>
-                                <label for="nom" class="block text-sm font-medium text-gray-700">Nom</label>
-                                <input type="text" id="nom" name="nom" 
-                                       value="<?= htmlspecialchars($adherent['nom']) ?>" 
-                                       required 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
-                            <div>
-                                <label for="prenom" class="block text-sm font-medium text-gray-700">Prénom</label>
-                                <input type="text" id="prenom" name="prenom" 
-                                       value="<?= htmlspecialchars($adherent['prenom']) ?>" 
-                                       required 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" id="email" name="email" 
-                                       value="<?= htmlspecialchars($adherent['email']) ?>" 
-                                       required 
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
+    <?php include 'navback.php'; ?>
+
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-user-edit mr-2"></i>Modifier un adhérent
+                </h2>
+
+                <form action="edit_adherent.php" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <!-- Photo de profil -->
+                    <div class="text-center">
+                        <img src="<?= htmlspecialchars($adherent['profile_photo'] ?? '../images/default-avatar.png') ?>" 
+                            alt="Photo actuelle" 
+                            class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-purple-200">
+                        <label class="cursor-pointer inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-camera mr-2"></i>
+                            Changer la photo
+                            <input type="file" 
+                                name="profile_photo" 
+                                class="hidden" 
+                                accept="image/*">
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Nom -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+                            <input type="text" name="nom" 
+                                value="<?= htmlspecialchars($adherent['nom']) ?>" 
+                                required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                         </div>
-                        <input type="hidden" name="id" value="<?= htmlspecialchars($adherent['id']) ?>">
-                        <div class="mt-6">
-                            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Modifier
-                            </button>
+
+                        <!-- Prénom -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
+                            <input type="text" name="prenom" 
+                                value="<?= htmlspecialchars($adherent['prenom']) ?>" 
+                                required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                         </div>
-                    </form>
-                </div>
+
+                        <!-- Email -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                            <input type="email" name="email" 
+                                value="<?= htmlspecialchars($adherent['email']) ?>" 
+                                required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($adherent['id']) ?>">
+
+                    <!-- Bouton de soumission -->
+                    <div class="flex justify-end border-t pt-6">
+                        <button type="submit" 
+                                class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
-        <div class="mt-6 text-center">
-            <a href="../gestion/dashboard.php" class="inline-block bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                Retour au Dashboard
-            </a>
         </div>
     </div>
 </body>

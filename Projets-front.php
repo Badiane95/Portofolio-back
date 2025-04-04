@@ -15,7 +15,7 @@ if ($result_home->num_rows > 0) {
 }
 
 // Projets
-$result_projects = $conn->query("SELECT * FROM projects LIMIT 3");
+$result_projects = $conn->query("SELECT * FROM projects LIMIT 4");
 if ($result_projects && $result_projects->num_rows > 0) {
     while($row = $result_projects->fetch_assoc()) {
         $projects[] = $row;
@@ -54,58 +54,62 @@ $conn->close();
             </header>
 
             <div class="grid md:grid-cols-3 gap-8">
-                <?php foreach($projects as $project): ?>
-                    <div class="bg-white shadow-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105">
-                        <div class="relative">
-                            <img 
-                                src="<?= htmlspecialchars($project['image_path']) ?>" 
-                                alt="<?= htmlspecialchars($project['name']) ?>" 
-                                class="w-full h-56 object-cover"
-                            />
-                            <div class="absolute top-0 right-0 bg-purple-600 text-white px-4 py-2 rounded-bl-lg">
-                                <?= htmlspecialchars(ucfirst($project['status'])) ?>
-                            </div>
-                        </div>
-                        
-                        <div class="p-6">
-                            <h3 class="text-2xl font-semibold text-purple-800 mb-3">
-                                <?= htmlspecialchars($project['name']) ?>
-                            </h3>
-                            
-                            <p class="text-gray-600 mb-4">
-                                <?= htmlspecialchars(substr($project['description'], 0, 100)) ?>...
-                            </p>
-                            
-                            <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
-                                <span>
-                                    <i class="fas fa-calendar-start text-purple-500 mr-2"></i>
-                                    <?= date('d/m/Y', strtotime($project['start_date'])) ?>
-                                </span>
-                                <span>
-                                    <i class="fas fa-calendar-end text-purple-500 mr-2"></i>
-                                    <?= date('d/m/Y', strtotime($project['end_date'])) ?>
-                                </span>
+                <?php if (!empty($projects)): ?>
+                    <?php foreach($projects as $project): ?>
+                        <div class="bg-white shadow-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                            <div class="relative">
+                                <img 
+                                    src="<?= htmlspecialchars($project['image_path']) ?>" 
+                                    alt="<?= htmlspecialchars($project['name']) ?>" 
+                                    class="w-full h-56 object-cover"
+                                />
+                                <div class="absolute top-0 right-0 bg-purple-600 text-white px-4 py-2 rounded-bl-lg">
+                                    <?= htmlspecialchars(ucfirst($project['status'])) ?>
+                                </div>
                             </div>
                             
-                            <a 
-                                href="gestion/project.php?id=<?= $project['id'] ?>" 
-                                class="block w-full text-center bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-300"
-                            >
-                                Détails du Projet <i class="fas fa-arrow-right ml-2"></i>
-                            </a>
+                            <div class="p-6">
+                                <h3 class="text-2xl font-semibold text-purple-800 mb-3">
+                                    <?= htmlspecialchars($project['name']) ?>
+                                </h3>
+                                
+                                <p class="text-gray-600 mb-4">
+                                    <?= htmlspecialchars(substr($project['description'], 0, 100)) ?>...
+                                </p>
+                                
+                                <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+                                    <span>
+                                        <i class="fas fa-calendar-start text-purple-500 mr-2"></i>
+                                        <?= date('d/m/Y', strtotime($project['start_date'])) ?>
+                                    </span>
+                                    <span>
+                                        <i class="fas fa-calendar-end text-purple-500 mr-2"></i>
+                                        <?= date('d/m/Y', strtotime($project['end_date'])) ?>
+                                    </span>
+                                </div>
+                                
+                               <!-- Lien vers les détails du projet -->
+<a 
+    href="<?= htmlspecialchars($project['project_link']) ?>" 
+    class="block w-full text-center bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-300"
+    target="_blank"
+>
+    Détails du Projet <i class="fas fa-arrow-right ml-2"></i>
+</a>
+                            </div>
                         </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Message si aucun projet n'est disponible -->
+                    <div class="text-center bg-purple-100 border border-purple-300 text-purple-800 px-4 py-3 rounded">
+                        Aucun projet n'est actuellement disponible.
                     </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
-
-            <?php if(empty($projects)): ?>
-                <div class="text-center bg-purple-100 border border-purple-300 text-purple-800 px-4 py-3 rounded">
-                    Aucun projet n'est actuellement disponible.
-                </div>
-            <?php endif; ?>
         </section>
     </div>
-    </div>
+
+
 
     <div class="container mx-auto px-4 py-12 flex-grow">
     <section id="videos" class="space-y-8">

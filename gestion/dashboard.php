@@ -68,145 +68,165 @@ while($row = $result_home_content->fetch_assoc()){
     <?php include 'navback.php'; ?>
     
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <h1 class="text-3xl font-bold text-purple-900 mb-4">Bienvenue dans le tableau de bord, <?php echo $_SESSION['admin']; ?> !</h1>
-            
-            <!-- Liste des projets -->
-            <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-3">Liste des Projets</h2>
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <?php if ($result_projects && $result_projects->num_rows > 0): ?>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                            <?php while($project = $result_projects->fetch_assoc()): ?>
-                                <div class="bg-gray-50 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                                    <img src="<?= htmlspecialchars($project['image_path'] ?? '') ?>" 
-                                         alt="<?= htmlspecialchars($project['alt_text'] ?? 'Image du projet') ?>" 
-                                         class="w-full h-48 object-cover">
-                                    
-                                    <div class="p-4">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <h3 class="text-lg font-semibold text-gray-800">
-                                                <?= htmlspecialchars($project['name'] ?? 'Nom non disponible') ?>
-                                            </h3>
-                                            <span class="px-3 py-1 text-sm rounded-full 
-                                                <?= match($project['status'] ?? '') {
-                                                    'planned' => 'bg-blue-100 text-blue-800',
-                                                    'in_progress' => 'bg-yellow-100 text-yellow-800',
-                                                    'completed' => 'bg-green-100 text-green-800',
-                                                    default => 'bg-gray-100 text-gray-800'
-                                                } ?>">
-                                                <?= match($project['status'] ?? '') {
-                                                    'planned' => 'Planifié',
-                                                    'in_progress' => 'En cours',
-                                                    'completed' => 'Terminé',
-                                                    default => 'Statut inconnu'
-                                                } ?>
-                                            </span>
-                                        </div>
+    <div class="px-4 py-6 sm:px-0">
+        <h1 class="text-3xl font-bold text-purple-800 mb-6">
+            <i class="fas fa-tachometer-alt mr-2"></i>Bienvenue, <?php echo $_SESSION['admin']; ?> !
+        </h1>
 
-                                        <?php if(!empty($project['description'])): ?>
-                                        <p class="text-sm text-gray-700 mb-4">
-                                            <?= htmlspecialchars($project['description']) ?>
-                                        </p>
+        <!-- Liste des projets -->
+        <section class="mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-purple-800">
+                    <i class="fas fa-project-diagram mr-2"></i>Projets en cours
+                </h2>
+            </div>
+
+            <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+                <?php if ($result_projects && $result_projects->num_rows > 0): ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                        <?php while($project = $result_projects->fetch_assoc()): ?>
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                                <img src="<?= htmlspecialchars($project['image_path'] ?? '') ?>" 
+                                     alt="<?= htmlspecialchars($project['alt_text'] ?? 'Image du projet') ?>" 
+                                     class="w-full h-48 object-cover">
+                                
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <h3 class="text-xl font-semibold text-purple-800">
+                                            <?= htmlspecialchars($project['name'] ?? 'Nom non disponible') ?>
+                                        </h3>
+                                        <span class="px-3 py-1 text-sm rounded-full 
+                                            <?= match($project['status'] ?? '') {
+                                                'planned' => 'bg-purple-100 text-purple-800',
+                                                'in_progress' => 'bg-purple-200 text-purple-900',
+                                                'completed' => 'bg-purple-600 text-white',
+                                                default => 'bg-gray-100 text-gray-800'
+                                            } ?>">
+                                            <?= match($project['status'] ?? '') {
+                                                'planned' => 'Planifié',
+                                                'in_progress' => 'En cours',
+                                                'completed' => 'Terminé',
+                                                default => 'Statut inconnu'
+                                            } ?>
+                                        </span>
+                                    </div>
+
+                                    <?php if(!empty($project['description'])): ?>
+                                    <p class="text-gray-600 mb-4 text-sm">
+                                        <?= htmlspecialchars($project['description']) ?>
+                                    </p>
+                                    <?php endif; ?>
+
+                                    <div class="text-sm text-purple-600 space-y-2 mb-4">
+                                        <?php if(!empty($project['start_date'])): ?>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar-start mr-2"></i>
+                                            <?= date('d/m/Y', strtotime($project['start_date'])) ?>
+                                        </div>
                                         <?php endif; ?>
-
-                                        <div class="text-sm text-gray-600 mb-3">
-                                            <?php if(!empty($project['start_date'])): ?>
-                                            <p class="mb-1">
-                                                <span class="font-medium">Début:</span> 
-                                                <?= date('d/m/Y', strtotime($project['start_date'])) ?>
-                                            </p>
-                                            <?php endif; ?>
-                                            
-                                            <?php if(!empty($project['end_date'])): ?>
-                                            <p>
-                                                <span class="font-medium">Fin:</span> 
-                                                <?= date('d/m/Y', strtotime($project['end_date'])) ?>
-                                            </p>
-                                            <?php endif; ?>
+                                        
+                                        <?php if(!empty($project['end_date'])): ?>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar-end mr-2"></i>
+                                            <?= date('d/m/Y', strtotime($project['end_date'])) ?>
                                         </div>
+                                        <?php endif; ?>
+                                    </div>
 
-                                        <div class="flex justify-end space-x-2">
-                                            <a href="edit_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
-                                               class="text-indigo-600 hover:text-indigo-900 text-sm">
-                                                Modifier
-                                            </a>
-                                            <span class="text-gray-400">|</span>
-                                            <a href="delete_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
-                                               class="text-red-600 hover:text-red-900 text-sm"
-                                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');">
-                                                Supprimer
-                                            </a>
-                                        </div>
+                                    <div class="flex items-center justify-end space-x-3">
+                                        <a href="edit_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
+                                           class="text-purple-600 hover:text-purple-900 text-sm">
+                                            <i class="fas fa-edit mr-1"></i>Modifier
+                                        </a>
+                                        <a href="delete_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
+                                           class="text-red-600 hover:text-red-900 text-sm"
+                                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');">
+                                            <i class="fas fa-trash mr-1"></i>Supprimer
+                                        </a>
                                     </div>
                                 </div>
-                            <?php endwhile; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="p-6 text-gray-500">Aucun projet trouvé</div>
-                    <?php endif; ?>
-                </div>
-            </section>
+                            </div>
+                        <?php endwhile; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="p-6 text-center bg-purple-50 border-t border-purple-100">
+                        <p class="text-purple-700">Aucun projet n'est actuellement enregistré</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </section>
     
 <section>
-  <!-- Liste des vidéos -->
-<div class="space-y-6">
-<h2 class="text-4xl font-bold text-purple-800 mb-4">
-                Mes Projet vidéos
-            </h2>
-    <?php
-    $videos = $conn->query("SELECT * FROM videos ORDER BY created_at DESC");
-    while($video = $videos->fetch_assoc()):
-    ?>
-    <div class="group bg-white hover:bg-purple-50 rounded-xl shadow-md hover:shadow-lg p-6 border-2 border-purple-50 transition-all">
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
-            <h3 class="text-lg font-bold text-purple-900 flex-1 truncate">
-                <?= htmlspecialchars($video['title']) ?>
-            </h3>
-            
-            <div class="flex gap-2">
-                <a href="edit_video.php?id=<?= $video['id'] ?>" 
-                   class="px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 rounded-lg border border-purple-200 transition-all">
-                   ✏️ Modifier
-                </a>
-                <a href="delete_video.php?id=<?= $video['id'] ?>" 
-                   class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-700 rounded-lg border border-red-200 transition-all"
-                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')">
-                   🗑️ Supprimer
-                </a>
-            </div>
-        </div>
-        
-        <?php if (!empty($video['description'])): ?>
-        <p class="text-purple-600 mb-4 text-sm leading-relaxed">
-            <?= nl2br(htmlspecialchars($video['description'])) ?>
-        </p>
-        <?php endif; ?>
-        
-        <div class="aspect-video rounded-xl overflow-hidden border-2 border-purple-100 bg-gray-50">
-            <iframe src="<?= htmlspecialchars($video['video_url']) ?>" 
-                class="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-            </iframe>
-        </div>
+ <!-- Section Vidéos -->
+<section class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-purple-800">
+            <i class="fas fa-video mr-2"></i>Vidéos publiées
+        </h2>
     </div>
-    <?php endwhile; ?>
-</div>
-</section>
 
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+        <?php
+        $videos = $conn->query("SELECT * FROM videos ORDER BY created_at DESC");
+        if ($videos->num_rows > 0): ?>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                <?php while($video = $videos->fetch_assoc()): ?>
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+                        <div class="aspect-video bg-gray-100">
+                            <iframe src="<?= htmlspecialchars($video['video_url']) ?>" 
+                                class="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-xl font-semibold text-purple-800 truncate">
+                                    <?= htmlspecialchars($video['title']) ?>
+                                </h3>
+                                <span class="text-sm text-purple-600">
+                                    <?= date('d/m/Y', strtotime($video['created_at'])) ?>
+                                </span>
+                            </div>
+
+                            <?php if(!empty($video['description'])): ?>
+                            <p class="text-gray-600 mb-4 text-sm">
+                                <?= htmlspecialchars($video['description']) ?>
+                            </p>
+                            <?php endif; ?>
+
+                            <div class="flex items-center justify-end space-x-3">
+                                <a href="edit_video.php?id=<?= $video['id'] ?>" 
+                                   class="text-purple-600 hover:text-purple-900 text-sm">
+                                    <i class="fas fa-edit mr-1"></i>Modifier
+                                </a>
+                                <a href="delete_video.php?id=<?= $video['id'] ?>" 
+                                   class="text-red-600 hover:text-red-900 text-sm"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')">
+                                    <i class="fas fa-trash mr-1"></i>Supprimer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else: ?>
+            <div class="p-6 text-center bg-purple-50 border-t border-purple-100">
+                <p class="text-purple-700">Aucune vidéo publiée pour le moment</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
 
 
 <!-- Section Gestion des Champs du Formulaire -->
 <section class="mb-8">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold text-gray-800">Gestion des Champs du Formulaire</h2>
-        <a href="add_field.php" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-            <i class="fas fa-plus mr-2"></i>Ajouter un champ
-        </a>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-purple-800">Gestion des Champs du Formulaire</h2>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100">
         <?php
         $fields = $conn->query("SELECT * FROM contact_form ORDER BY display_order ASC");
         if ($fields->num_rows > 0): ?>
@@ -250,7 +270,7 @@ while($row = $result_home_content->fetch_assoc()){
                             <div class="col-span-2">
                                 <form method="POST" action="edit_field.php" class="flex items-center gap-2">
                                     <input type="number" name="display_order" value="<?= $field['display_order'] ?>" 
-                                           class="w-16 px-2 py-1 border rounded" min="1">
+                                           class="w-16 px-2 py-1 border rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500" min="1">
                                     <input type="hidden" name="id" value="<?= $field['id'] ?>">
                                     <button type="submit" name="update_order" 
                                             class="text-purple-600 hover:text-purple-900">
@@ -267,11 +287,11 @@ while($row = $result_home_content->fetch_assoc()){
                                 </a>
                                 <span class="text-gray-300">|</span>
                                 <form method="POST" action="delete_field.php" onsubmit="return confirm('Êtes-vous sûr ?')">
-    <input type="hidden" name="id" value="<?= $field['id'] ?>">
-    <button type="submit" class="text-red-600 hover:text-red-900">
-        <i class="fas fa-trash mr-1"></i>Supprimer
-    </button>
-</form>
+                                    <input type="hidden" name="id" value="<?= $field['id'] ?>">
+                                    <button type="submit" class="text-red-600 hover:text-red-900">
+                                        <i class="fas fa-trash mr-1"></i>Supprimer
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -522,54 +542,63 @@ while($row = $result_home_content->fetch_assoc()){
             </div>
 </section>
             <!-- Liste des CV existants -->
-            <?php
-            $query = "SELECT * FROM cv ORDER BY date_ajout DESC";
-            $result = $conn->query($query);
-            ?>
+<section class="mb-8">
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
+        <?php
+        $query = "SELECT * FROM cv ORDER BY date_ajout DESC";
+        $result = $conn->query($query);
+        ?>
 
-            <div class="px-6 pb-6">
-                <h3 class="text-2xl font-semibold text-gray-800 mb-3">CV existants (<?= $result->num_rows ?>)</h3>
+        <h3 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
+            CV existants (<?= $result->num_rows ?>)
+        </h3>
 
-                <div class="overflow-x-auto rounded-lg border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Statut</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Nom</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Date d'ajout</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php while($cv = $result->fetch_assoc()): ?>
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1 text-xs rounded-full <?= $cv['actif'] ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' ?>">
-                                        <?= $cv['actif'] ? 'Actif' : 'Inactif' ?>
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-900"><?= htmlspecialchars($cv['nom_cv']) ?></td>
-                                <td class="px-4 py-3 text-sm text-gray-500"><?= date('d/m/Y H:i', strtotime($cv['date_ajout'])) ?></td>
-                                <td class="px-4 py-3 text-sm space-x-2">
-                                    <a href="download_cv.php?id=<?= $cv['id'] ?>" class="text-purple-600 hover:text-purple-900">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                    <a href="edit_cv.php?id=<?= $cv['id'] ?>" class="text-blue-600 hover:text-blue-900">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="delete_cv.php?id=<?= $cv['id'] ?>" class="text-red-600 hover:text-red-900"
-                                       onclick="return confirm('Supprimer définitivement ce CV ?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="overflow-x-auto rounded-lg border border-purple-100">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-purple-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Statut</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Nom</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Date d'ajout</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php while($cv = $result->fetch_assoc()): ?>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                <?= $cv['actif'] ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' ?>">
+                                <?= $cv['actif'] ? 'Actif' : 'Inactif' ?>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 font-medium"><?= htmlspecialchars($cv['nom_cv']) ?></td>
+                        <td class="px-6 py-4 text-sm text-gray-500"><?= date('d/m/Y H:i', strtotime($cv['date_ajout'])) ?></td>
+                        <td class="px-6 py-4 text-sm space-x-4">
+                            <a href="download_cv.php?id=<?= $cv['id'] ?>" 
+                               class="text-purple-600 hover:text-purple-900 transition-colors"
+                               title="Télécharger">
+                                <i class="fas fa-download text-lg"></i>
+                            </a>
+                            <a href="edit_cv.php?id=<?= $cv['id'] ?>" 
+                               class="text-purple-600 hover:text-purple-900 transition-colors"
+                               title="Modifier">
+                                <i class="fas fa-edit text-lg"></i>
+                            </a>
+                            <a href="delete_cv.php?id=<?= $cv['id'] ?>" 
+                               class="text-red-600 hover:text-red-900 transition-colors"
+                               title="Supprimer"
+                               onclick="return confirm('Supprimer définitivement ce CV ?')">
+                                <i class="fas fa-trash text-lg"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
         </div>
-    </section>
+    </div>
+</section>
 
     <script>
     function previewFileName(input) {
@@ -580,112 +609,136 @@ while($row = $result_home_content->fetch_assoc()){
     }
     </script>
 
+<!-- Liste des adhérents -->
+<section class="mb-8">
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
+        <h2 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
+            Liste des adhérents
+        </h2>
+        
+        <div class="overflow-x-auto rounded-lg border border-purple-100">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-purple-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Photo</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">ID</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Nom</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Prénom</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Email</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php while($adherent = $result_adherents->fetch_assoc()): ?>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <img src="<?= $adherent['profile_photo'] ? htmlspecialchars($adherent['profile_photo']) : '../images/default-avatar.png' ?>" 
+                                 alt="Photo de profil <?= htmlspecialchars($adherent['prenom']) ?>" 
+                                 class="w-12 h-12 rounded-full object-cover border-2 border-purple-200">
+                        </td>
+                        <td class="px-6 py-4 text-gray-900 font-medium"><?= htmlspecialchars($adherent['id']) ?></td>
+                        <td class="px-6 py-4 text-gray-900"><?= htmlspecialchars($adherent['nom']) ?></td>
+                        <td class="px-6 py-4 text-gray-900"><?= htmlspecialchars($adherent['prenom']) ?></td>
+                        <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($adherent['email']) ?></td>
+                        <td class="px-6 py-4 space-x-4">
+                            <a href="edit_adherent.php?id=<?= $adherent['id'] ?>" 
+                               class="text-purple-600 hover:text-purple-900 transition-colors">
+                                Modifier
+                            </a>
+                            <a href="delete_adherent.php?id=<?= $adherent['id'] ?>" 
+                               class="text-red-600 hover:text-red-900 transition-colors"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet adhérent ?');">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 
-            <!-- Liste des adhérents -->
-            <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-3">Liste des adhérents</h2>
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prénom</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php while($adherent = $result_adherents->fetch_assoc()): ?>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <img src="<?= $adherent['profile_photo'] ? htmlspecialchars($adherent['profile_photo']) : '../images/default-avatar.png' ?>" 
-                                         alt="Photo de profil <?= htmlspecialchars($adherent['prenom']) ?>" 
-                                         class="w-12 h-12 rounded-full object-cover border-2 border-purple-100">
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($adherent['id']) ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($adherent['nom']) ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($adherent['prenom']) ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($adherent['email']) ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="edit_adherent.php?id=<?= $adherent['id'] ?>" class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</a>
-                                    <a href="delete_adherent.php?id=<?= $adherent['id'] ?>" 
-                                       class="text-red-600 hover:text-red-900" 
-                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet adhérent ?');">
-                                        Supprimer
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+<!-- Liste des médias sociaux -->
+<section class="mb-8">
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
+        <h2 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
+            Liste des médias sociaux
+        </h2>
 
-            <!-- Liste des médias sociaux -->
-            <section class="mb-8">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-3">Liste des médias sociaux</h2>
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lien</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php while($media = $result_social_media->fetch_assoc()): ?>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($media['id']); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($media['nom']); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($media['link']); ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="edit_social_media.php?id=<?php echo $media['id']; ?>" class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</a>
-                                    <a href="delete_social_media.php?id=<?php echo $media['id']; ?>" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce média social ?');">Supprimer</a>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-
-            <!-- Liste des images -->
-<section>
-    <h2 class="text-2xl font-semibold text-gray-800 mb-3">Liste des Images</h2>
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+        <div class="overflow-x-auto rounded-lg border border-purple-100">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-purple-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">ID</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Nom</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Lien</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php while($media = $result_social_media->fetch_assoc()): ?>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-gray-900 font-medium"><?= htmlspecialchars($media['id']) ?></td>
+                        <td class="px-6 py-4 text-gray-900"><?= htmlspecialchars($media['nom']) ?></td>
+                        <td class="px-6 py-4 text-purple-600 hover:text-purple-900">
+                            <a href="<?= htmlspecialchars($media['link']) ?>" target="_blank">
+                                <?= htmlspecialchars($media['link']) ?>
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 space-x-4">
+                            <a href="edit_social_media.php?id=<?= $media['id'] ?>" 
+                               class="text-purple-600 hover:text-purple-900 transition-colors">
+                                Modifier
+                            </a>
+                            <a href="delete_social_media.php?id=<?= $media['id'] ?>" 
+                               class="text-red-600 hover:text-red-900 transition-colors"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce média social ?');">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+<!-- Liste des images -->
+<section class="mb-8">
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
+        <h2 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
+            Liste des Images
+        </h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <?php
             $query = "SELECT * FROM images ORDER BY upload_date DESC";
             $result_images = $conn->query($query);
             while ($image = $result_images->fetch_assoc()): ?>
-                <div class="bg-gray-100 rounded-lg overflow-hidden shadow-md">
-                    <img src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?php echo htmlspecialchars($image['filename']); ?>" 
-                         alt="<?php echo htmlspecialchars($image['filename']); ?>" 
-                         class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <p class="text-sm font-semibold text-gray-700 mb-2"><?php echo htmlspecialchars($image['filename']); ?></p>
-                        <p class="text-xs text-gray-500 mb-2">Ajouter: <?php echo date('d/m/Y', strtotime($image['upload_date'])); ?></p>
-                        <a href="delete_image.php?id=<?php echo $image['id']; ?>" 
-                           class="text-red-600 hover:text-red-900 text-xs"
-                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette image ?');">
-                            Supprimer
-                        </a>
+                <div class="bg-white rounded-lg border border-purple-100 hover:shadow-lg transition-shadow">
+                    <img src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>" 
+                         alt="<?= htmlspecialchars($image['filename']) ?>" 
+                         class="w-full h-48 object-cover border-b border-purple-100">
+                    <div class="p-4 space-y-2">
+                        <p class="text-sm font-medium text-gray-900 truncate"><?= htmlspecialchars($image['filename']) ?></p>
+                        <p class="text-xs text-gray-500">Ajouté le <?= date('d/m/Y', strtotime($image['upload_date'])) ?></p>
+                        <div class="pt-2">
+                            <a href="delete_image.php?id=<?= $image['id'] ?>" 
+                               class="text-red-600 hover:text-red-900 text-sm transition-colors"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette image ?');">
+                                <i class="fas fa-trash mr-1"></i>Supprimer
+                            </a>
+                        </div>
                     </div>
                 </div>
             <?php endwhile; ?>
         </div>
     </div>
 </section>
-
-
    
     <script src="https://cdn.tiny.cloud/1/votre-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     
 </body>
-<?php include 'footer.php'; ?>
 </html>
+<?php include 'footer.php'; ?>

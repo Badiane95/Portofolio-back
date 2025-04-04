@@ -65,52 +65,61 @@ $lastImage = $lastImageResult->fetch_assoc();
 
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <title>Ajouter des images</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="dropZone.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+<body class="bg-gray-100">
+    <?php include 'navback.php'; ?>
 
-<body class="bg-zinc-100 font-sans">
-    <header>
-        <?php include 'navback.php'; ?>
-    </header>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+            <div class="p-8">
+                <h1 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-image mr-2"></i>Ajouter une image
+                </h1>
 
-    <main class="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <div class="p-6 sm:p-8">
-                <h1 class="text-3xl font-bold text-purple-700 mb-6">Ajouter une image</h1>
                 <form action="" method="post" enctype="multipart/form-data" class="space-y-6">
+                    <!-- Titre -->
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-                        <input type="text" id="title" name="title" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                            placeholder="Titre de l'image">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
+                        <input type="text" name="title" required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                               placeholder="Titre descriptif">
                     </div>
 
-                    <div id="drop-zone"
-                        class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-purple-500 transition-colors duration-300">
-                        <p class="text-gray-600 mb-2">Glissez et déposez votre image ici</p>
-                        <p class="text-sm text-gray-400">ou cliquez pour sélectionner</p>
-                        <!-- Input file modifié pour accepter uniquement les formats jpg, jpeg, png et webp -->
-                        <input type="file" name="image" id="image" class="hidden" accept=".jpg, .jpeg, .png, .webp">
-                        <img id="preview" src="" alt="Aperçu de l'image"
-                            class="mt-4 mx-auto hidden max-w-full h-auto rounded-lg shadow-md">
-                    </div>
-
+                    <!-- Zone de dépôt -->
                     <div>
-                        <label for="alt" class="block text-sm font-medium text-gray-700 mb-1">Texte alternatif (Alt)</label>
-                        <input type="text" id="alt" name="alt"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                            placeholder="Description de l'image pour l'accessibilité">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image *</label>
+                        <div id="drop-zone" 
+                             class="border-2 border-dashed border-purple-200 rounded-lg p-6 text-center cursor-pointer hover:border-purple-400 transition-colors">
+                            <p class="text-gray-600 mb-2">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>Glissez et déposez votre image ici
+                            </p>
+                            <p class="text-sm text-gray-400">ou cliquez pour sélectionner</p>
+                            <input type="file" name="image" id="image" class="hidden" 
+                                   accept=".jpg, .jpeg, .png, .webp">
+                            <img id="preview" src="" alt="Aperçu de l'image" 
+                                 class="mt-4 mx-auto hidden max-w-full h-48 object-cover rounded-lg shadow-md">
+                        </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button type="submit"
-                            class="px-6 py-2 bg-purple-600 text-white font-medium rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300">
-                            Ajouter
+                    <!-- Texte alternatif -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description alternative *</label>
+                        <input type="text" name="alt" required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                               placeholder="Décrivez l'image pour l'accessibilité">
+                    </div>
+
+                    <!-- Bouton de soumission -->
+                    <div class="flex justify-end border-t pt-6">
+                        <button type="submit" 
+                                class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-upload mr-2"></i>Publier l'image
                         </button>
                     </div>
                 </form>
@@ -118,18 +127,21 @@ $lastImage = $lastImageResult->fetch_assoc();
         </div>
 
         <?php if ($lastImage): ?>
-        <section class="mt-8 bg-white shadow-lg rounded-xl overflow-hidden">
-            <h2 class="sr-only">Dernière image uploadée</h2>
-            <img class="w-full h-64 object-cover"
-                src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?php echo htmlspecialchars($lastImage['filename']); ?>"
-                alt="<?php echo htmlspecialchars($lastImage['title']); ?>">
+        <div class="mt-8 bg-white shadow-xl rounded-lg border border-purple-100 overflow-hidden">
             <div class="p-6">
-                <p class="text-xl font-semibold text-gray-800"><?= htmlspecialchars($lastImage['title']); ?></p>
-                <p class="text-sm text-gray-500">Nom du fichier : <?= htmlspecialchars($lastImage['filename']); ?></p>
+                <h2 class="text-lg font-semibold text-purple-800 mb-4">
+                    <i class="fas fa-history mr-2"></i>Dernière image ajoutée
+                </h2>
+                <img class="w-full h-64 object-cover rounded-lg mb-4"
+                    src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?= htmlspecialchars($lastImage['filename']) ?>"
+                    alt="<?= htmlspecialchars($lastImage['title']) ?>">
+                <div class="space-y-2">
+                    <p class="text-gray-900 font-medium"><?= htmlspecialchars($lastImage['title']) ?></p>
+                    <p class="text-sm text-gray-500"><?= htmlspecialchars($lastImage['filename']) ?></p>
+                </div>
             </div>
-        </section>
+        </div>
         <?php endif; ?>
-    </main>
+    </div>
 </body>
-
 </html>

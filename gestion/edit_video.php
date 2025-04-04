@@ -67,59 +67,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier la vidéo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<?php include 'navback.php'; ?>
-<body class="bg-purple-50">
-    
-<div class="container mx-auto p-6 max-w-4xl">
-    <a href="dashboard.php" class="inline-block mb-6 text-purple-600 hover:text-purple-800">
-        ← Retour au dashboard
-    </a>
-    
-    <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-purple-100">
-        <h1 class="text-2xl font-bold text-purple-700 mb-6">Modifier la vidéo</h1>
-        
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <?= $_SESSION['error'] ?>
-            </div>
-            <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
-        
-        <form method="POST" class="space-y-6">
-        <input type="hidden" name="id" value="<?= $video['id'] ?>">
-            
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-purple-700">Titre</label>
-                <input type="text" name="title" value="<?= htmlspecialchars($video['title']) ?>" 
-                    class="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
-            </div>
-            
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-purple-700">URL YouTube (embed)</label>
-                <input type="url" name="video_url" value="<?= htmlspecialchars($video['video_url']) ?>"
-                    pattern="https://www\.youtube\.com/embed/.+"
-                    class="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
-            </div>
-            
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-purple-700">Description</label>
-                <textarea name="description" rows="4"
-                    class="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"><?= 
-                    htmlspecialchars($video['description']) ?></textarea>
-            </div>
-            
-            <div class="flex justify-end gap-4">
-                <button type="reset" class="px-6 py-2 text-purple-700 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100">
-                    Réinitialiser
-                </button>
-                <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                    Enregistrer les modifications
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+<body class="bg-gray-100">
+    <?php include 'navback.php'; ?>
 
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+            <div class="p-8">
+                <h1 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-video mr-2"></i>Modifier la vidéo
+                </h1>
+
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="p-4 mb-6 text-red-800 bg-red-100 rounded-lg">
+                        <?= $_SESSION['error'] ?>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
+                <?php endif; ?>
+
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="id" value="<?= $video['id'] ?>">
+
+                    <!-- Titre -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
+                        <input type="text" name="title" 
+                               value="<?= htmlspecialchars($video['title']) ?>" 
+                               required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+
+                    <!-- URL YouTube -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">URL Embed YouTube *</label>
+                        <input type="url" name="video_url" 
+                               value="<?= htmlspecialchars($video['video_url']) ?>"
+                               pattern="https://www\.youtube\.com/embed/.+"
+                               required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                               placeholder="https://www.youtube.com/embed/ID_VIDEO">
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea name="description" rows="4"
+                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"><?= 
+                                  htmlspecialchars($video['description']) ?></textarea>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="flex justify-end border-t pt-6">
+                        <div class="space-x-4">
+                            <button type="reset" class="text-gray-600 hover:text-gray-800">
+                                Réinitialiser
+                            </button>
+                            <button type="submit" 
+                                    class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

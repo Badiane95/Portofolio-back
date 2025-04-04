@@ -28,7 +28,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -37,44 +36,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="shortcut icon" href="../images/favicon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100">
     <?php include 'navback.php'; ?>
     
-    <div class="container mx-auto px-4 py-8">
-        <h2 class="text-2xl font-bold text-purple-600 mb-6">Ajouter un média social</h2>
-        
-        <?php
-        if (isset($_SESSION['message'])) {
-            echo "<p class='text-green-600 mb-4'>" . $_SESSION['message'] . "</p>";
-            unset($_SESSION['message']);
-        }
-        if (isset($_SESSION['error'])) {
-            echo "<p class='text-red-600 mb-4'>" . $_SESSION['error'] . "</p>";
-            unset($_SESSION['error']);
-        }
-        ?>
-        
-        <form action="add_social_media.php" method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="nom_media">
-                    Nom
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="nom_media" type="text" name="nom" placeholder="Nom du média social" required>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-hashtag mr-2"></i>Ajouter un réseau social
+                </h2>
+
+                <?php if(isset($_SESSION['message'])): ?>
+                    <div class="p-4 mb-6 text-green-800 bg-green-100 rounded-lg"><?= $_SESSION['message'] ?></div>
+                    <?php unset($_SESSION['message']); ?>
+                <?php endif; ?>
+
+                <?php if(isset($_SESSION['error'])): ?>
+                    <div class="p-4 mb-6 text-red-800 bg-red-100 rounded-lg"><?= $_SESSION['error'] ?></div>
+                    <?php unset($_SESSION['error']); ?>
+                <?php endif; ?>
+
+                <form action="add_social_media.php" method="POST" class="space-y-6">
+                    <div class="grid grid-cols-1 gap-6">
+                        <!-- Nom du média -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nom du réseau *</label>
+                            <input type="text" name="nom" required
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   placeholder="Ex: LinkedIn, GitHub...">
+                        </div>
+
+                        <!-- Lien -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Lien du profil *</label>
+                            <input type="url" name="link" required
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end border-t pt-6">
+                        <button type="submit" 
+                                class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-plus-circle mr-2"></i>Ajouter le réseau
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="link">
-                    Lien
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="link" type="url" name="link" placeholder="Lien du média social" required>
-            </div>
-            <div class="flex items-center justify-between">
-                <button class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                    Ajouter
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 </body>
-
 </html>

@@ -1,76 +1,119 @@
 <?php
 session_start();
 
-// Vérification de l'admin
-if (!isset($_SESSION['admin'])) {
-    header("Location: ../login/session.php");
-    exit;
-}
-
 include __DIR__ . '/../connexion/msql.php';
 
+// Configuration sécurisée du répertoire d'upload
 $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/BUT2/S4/Portofolio-Back/lib/uploadArticle/';
+$allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+$maxFileSize = 5 * 1024 * 1024; // 5 Mo
 
-if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+try {
+    if (!file_exists($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+        throw new Exception("Erreur lors de la création du répertoire");
+    }
+} catch (Exception $e) {
+    die("Erreur système : " . $e->getMessage());
 }
 
 $message = '';
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Récupération des données avec validation moderne
-    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_SPECIAL_CHARS);
-    $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
-    $start_date = $_POST['start_date'] ?? null;
-    $end_date = $_POST['end_date'] ?? null;
-    $status = in_array($_POST['status'] ?? '', ['planned', 'in_progress', 'completed']) ? $_POST['status'] : 'planned';
-    $alt = filter_input(INPUT_POST, 'alt', FILTER_SANITIZE_SPECIAL_CHARS);
-
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $fileExt = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-
-        if (in_array($fileExt, $allowedExtensions)) {
-            $newFileName = uniqid('', true) . "." . $fileExt;
-            $fileDestination = $uploadDir . $newFileName;
-            $relativePath = '/BUT2/S4/Portofolio-Back/lib/uploadArticle/' . $newFileName;
-
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $fileDestination)) {
-                // Requête SQL mise à jour selon la structure de la table
-                $sql = "INSERT INTO projects 
-                (name, description, start_date, end_date, status, image_path, alt_text) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)";
-                
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sssssss", 
-                    $name,
-                    $description,
-                    $start_date,
-                    $end_date,
-                    $status,
-                    $relativePath,
-                    $alt
-                );
-
-                if ($stmt->execute()) {
-                    $message = "Projet ajouté avec succès !";
-                } else {
-                    $error = "Erreur SQL: " . $stmt->error;
-                }
-                $stmt->close();
-            } else {
-                $error = "Erreur lors de l'upload du fichier";
-            }
-        } else {
-            $error = "Format d'image non supporté";
+    try {
+        // Validation CSRF (à implémenter selon votre système)
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            throw new Exception("Validation de formulaire invalide");
         }
-    } else {
-        $error = "Veuillez sélectionner une image valide";
+
+        // Nettoyage des entrées
+        $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_SPECIAL_CHARS);
+        $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
+        $start_date = $_POST['start_date'] ?? null;
+        $end_date = $_POST['end_date'] ?? null;
+        $status = in_array($_POST['status'] ?? '', ['planned', 'in_progress', 'completed']) ? $_POST['status'] : 'planned';
+        $alt = filter_input(INPUT_POST, 'alt', FILTER_SANITIZE_SPECIAL_CHARS);
+        $project_link = filter_input(INPUT_POST, 'project_link', FILTER_VALIDATE_URL);
+
+        // Validation des dates
+        if (!empty($end_date) && strtotime($end_date) < strtotime($start_date)) {
+            throw new Exception("La date de fin doit être postérieure à la date de début");
+        }
+
+        // Gestion du fichier
+        if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception("Veuillez sélectionner une image valide");
+        }
+
+        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $fileInfo->file($_FILES['image']['tmp_name']);
+
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            throw new Exception("Type de fichier non autorisé");
+        }
+
+        if ($_FILES['image']['size'] > $maxFileSize) {
+            throw new Exception("La taille du fichier dépasse 5 Mo");
+        }
+
+        // Génération du nom de fichier sécurisé
+        $fileExtension = array_search($mimeType, [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp'
+        ]);
+
+        $newFileName = bin2hex(random_bytes(16)) . "." . $fileExtension;
+        $fileDestination = $uploadDir . $newFileName;
+        $relativePath = '/BUT2/S4/Portofolio-Back/lib/uploadArticle/' . $newFileName;
+
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $fileDestination)) {
+            throw new Exception("Erreur lors de l'enregistrement du fichier");
+        }
+
+        // Préparation de la requête SQL
+        $sql = "INSERT INTO projects 
+                (name, description, start_date, end_date, status, image_path, alt_text, project_link) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Erreur de préparation de la requête");
+        }
+
+        $stmt->bind_param("ssssssss", 
+            $name,
+            $description,
+            $start_date,
+            $end_date,
+            $status,
+            $relativePath,
+            $alt,
+            $project_link
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("Erreur d'exécution de la requête : " . $stmt->error);
+        }
+
+        $message = "Projet ajouté avec succès !";
+        $stmt->close();
+
+        // Réinitialisation du formulaire après succès
+        $_POST = array();
+
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+        // Nettoyage du fichier en cas d'erreur
+        if (isset($fileDestination) && file_exists($fileDestination)) {
+            unlink($fileDestination);
+        }
     }
 }
-?>
 
+// Génération du token CSRF
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -78,86 +121,121 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Ajouter un projet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="dropZone.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100">
-    <header>
-        <?php include 'navback.php'; ?>
-    </header>
+    <?php include 'navback.php'; ?>
 
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="px-4 py-6 sm:px-0">
-            <h1 class="text-2xl font-bold text-purple-600 mb-6">Ajouter un projet</h1>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+            <div class="p-8">
+                <h1 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-project-diagram mr-2"></i>Ajouter un projet
+                </h1>
 
-            <?php if ($message): ?>
-                <div class="bg-green-200 text-green-800 p-3 rounded mb-4"><?= htmlspecialchars($message) ?></div>
-            <?php endif; ?>
+                <?php if ($message): ?>
+                    <div class="p-4 mb-6 text-green-800 bg-green-100 rounded-lg"><?= htmlspecialchars($message) ?></div>
+                <?php endif; ?>
 
-            <?php if ($error): ?>
-                <div class="bg-red-200 text-red-800 p-3 rounded mb-4"><?= htmlspecialchars($error) ?></div>
-            <?php endif; ?>
+                <?php if ($error): ?>
+                    <div class="p-4 mb-6 text-red-800 bg-red-100 rounded-lg"><?= htmlspecialchars($error) ?></div>
+                <?php endif; ?>
 
-            <form action="" method="post" enctype="multipart/form-data" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Nom du projet</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                           id="name" type="text" name="name" required>
-                </div>
+                <form action="" method="post" enctype="multipart/form-data" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
-                    <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                              id="description" name="description" rows="4" required></textarea>
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Nom du projet -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nom du projet *</label>
+                            <input type="text" name="name" required
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   placeholder="Nom du projet"
+                                   value="<?= htmlspecialchars($_POST['name'] ?? '') ?>">
+                        </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="start_date">Date de début</label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                               id="start_date" type="date" name="start_date" required>
+                        <!-- Statut -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Statut *</label>
+                            <select name="status" required
+                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="planned" <?= ($_POST['status'] ?? '') === 'planned' ? 'selected' : '' ?>>Planifié</option>
+                                <option value="in_progress" <?= ($_POST['status'] ?? '') === 'in_progress' ? 'selected' : '' ?>>En cours</option>
+                                <option value="completed" <?= ($_POST['status'] ?? '') === 'completed' ? 'selected' : '' ?>>Terminé</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <!-- Description -->
                     <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="end_date">Date de fin prévue</label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                               id="end_date" type="date" name="end_date">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                        <textarea name="description" rows="4" required
+                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                  placeholder="Décrivez le projet..."><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
                     </div>
-                </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="status">Statut</label>
-                    <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                            id="status" name="status" required>
-                        <option value="planned">Planifié</option>
-                        <option value="in_progress">En cours</option>
-                        <option value="completed">Terminé</option>
-                    </select>
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Dates -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date de début *</label>
+                            <input type="date" name="start_date" required
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   value="<?= htmlspecialchars($_POST['start_date'] ?? '') ?>">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
+                            <input type="date" name="end_date"
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                   value="<?= htmlspecialchars($_POST['end_date'] ?? '') ?>">
+                        </div>
+                    </div>
 
-                <div class="mb-4">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="image">Image</label>
-    <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors duration-300">
-        <p class="text-gray-600 mb-2">Glissez et déposez votre image ici</p>
-        <p class="text-sm text-gray-400">ou</p>
-        <input class="hidden" type="file" id="image" name="image" accept="image/*" required>
-        <button type="button" id="select-file" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-            Sélectionner un fichier
-        </button>
-    </div>
-    <img id="preview" src="" alt="Aperçu de l'image" class="mt-4 mx-auto hidden max-w-full h-auto rounded-lg shadow-md">
-</div>
+                    <!-- Image -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image du projet *</label>
+                        <div id="drop-zone" class="border-2 border-dashed border-purple-200 rounded-lg p-6 text-center cursor-pointer hover:border-purple-400 transition-colors">
+                            <p class="text-gray-600 mb-2">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>Glissez et déposez votre image ici
+                            </p>
+                            <p class="text-sm text-gray-400">Formats acceptés : JPG, PNG, WEBP (max 5 Mo)</p>
+                            <input class="hidden" type="file" id="image" name="image" accept="image/*" required>
+                            <button type="button" id="select-file" 
+                                    class="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                Sélectionner un fichier
+                            </button>
+                        </div>
+                        <img id="preview" src="" alt="Aperçu de l'image" 
+                             class="mt-4 mx-auto hidden max-w-full h-48 object-cover rounded-lg shadow-md">
+                    </div>
 
+                    <!-- Lien du projet -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lien du projet</label>
+                        <input type="url" name="project_link"
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                               placeholder="https://example.com/project"
+                               value="<?= htmlspecialchars($_POST['project_link'] ?? '') ?>">
+                    </div>
 
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="alt">Texte alternatif (alt)</label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                           type="text" id="alt" name="alt" required>
-                </div>
+                    <!-- Texte alternatif -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Texte alternatif *</label>
+                        <input type="text" name="alt" required
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                               placeholder="Description de l'image"
+                               value="<?= htmlspecialchars($_POST['alt'] ?? '') ?>">
+                    </div>
 
-                <div class="flex items-center justify-between">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
-                            type="submit">Ajouter le projet</button>
-                </div>
-            </form>
+                    <!-- Bouton de soumission -->
+                    <div class="flex justify-end border-t pt-6">
+                        <button type="submit" 
+                                class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-plus-circle mr-2"></i>Ajouter le projet
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </main>
+    </div>
 </body>
 </html>

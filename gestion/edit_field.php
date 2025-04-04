@@ -53,7 +53,7 @@ if (!$field) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,68 +61,86 @@ if (!$field) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<div class="max-w-3xl mx-auto py-8">
-    <div class="bg-white shadow-xl rounded-lg p-8 border border-purple-100">
-        <h2 class="text-2xl font-bold text-purple-800 mb-6">Modifier le champ</h2>
-        
-        <form method="POST" action="edit_field.php" class="space-y-6">
-            <input type="hidden" name="id" value="<?= $field['id'] ?>">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Type de champ -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Type de champ</label>
-                    <select name="field_type" required
-                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                        <option value="text" <?= $field['field_type'] === 'text' ? 'selected' : '' ?>>Texte</option>
-                        <option value="email" <?= $field['field_type'] === 'email' ? 'selected' : '' ?>>Email</option>
-                        <option value="select" <?= $field['field_type'] === 'select' ? 'selected' : '' ?>>Liste déroulante</option>
-                        <option value="textarea" <?= $field['field_type'] === 'textarea' ? 'selected' : '' ?>>Zone de texte</option>
-                    </select>
-                </div>
+<body class="bg-gray-100">
+<?php include 'navback.php'; ?>
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-purple-800 mb-6">
+                    <i class="fas fa-edit mr-2"></i>Modifier le champ
+                </h2>
 
-                <!-- Libellé -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Libellé</label>
-                    <input type="text" name="label" value="<?= htmlspecialchars($field['label']) ?>" required
-                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                </div>
+                <form method="POST" action="edit_field.php" class="space-y-6">
+                    <input type="hidden" name="id" value="<?= $field['id'] ?>">
 
-                <!-- Placeholder -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Placeholder</label>
-                    <input type="text" name="placeholder" value="<?= htmlspecialchars($field['placeholder']) ?>"
-                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Type de champ -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Type de champ *</label>
+                            <select name="field_type" required
+                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="text" <?= $field['field_type'] === 'text' ? 'selected' : '' ?>>Texte</option>
+                                <option value="email" <?= $field['field_type'] === 'email' ? 'selected' : '' ?>>Email</option>
+                                <option value="select" <?= $field['field_type'] === 'select' ? 'selected' : '' ?>>Liste déroulante</option>
+                                <option value="textarea" <?= $field['field_type'] === 'textarea' ? 'selected' : '' ?>>Zone de texte</option>
+                            </select>
+                        </div>
 
-                <!-- Options (seulement pour select) -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Options (séparées par des virgules)</label>
-                    <textarea name="options" rows="3"
-                              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                              <?= $field['field_type'] !== 'select' ? 'disabled' : '' ?>><?= htmlspecialchars($field['options']) ?></textarea>
-                </div>
+                        <!-- Libellé -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Libellé *</label>
+                            <input type="text" name="label" 
+                                   value="<?= htmlspecialchars($field['label']) ?>" 
+                                   required
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+
+                        <!-- Placeholder -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Placeholder</label>
+                            <input type="text" name="placeholder" 
+                                   value="<?= htmlspecialchars($field['placeholder']) ?>"
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+
+                        <!-- Options -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Options (séparées par des virgules)
+                                <span class="text-xs text-gray-400 ml-1">(uniquement pour les listes déroulantes)</span>
+                            </label>
+                            <textarea name="options" rows="3"
+                                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                      <?= $field['field_type'] !== 'select' ? 'disabled' : '' ?>><?= htmlspecialchars($field['options']) ?></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Options de bas de formulaire -->
+                    <div class="flex flex-col md:flex-row justify-between border-t pt-6 space-y-4 md:space-y-0">
+                        <div class="flex items-center">
+                            <input type="checkbox" 
+                                   name="is_required" 
+                                   id="is_required" 
+                                   <?= $field['is_required'] ? 'checked' : '' ?>
+                                   class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                            <label for="is_required" class="ml-2 text-sm text-gray-600">Champ obligatoire</label>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <a href="dashboard.php" 
+                               class="text-gray-600 hover:text-gray-800 transition-colors">
+                                Annuler
+                            </a>
+                            <button type="submit" 
+                                    name="save_contact_field" 
+                                    class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-
-            <!-- Options de bas de formulaire -->
-            <div class="flex items-center justify-between border-t pt-6">
-                <div class="flex items-center">
-                    <input type="checkbox" name="is_required" id="is_required" <?= $field['is_required'] ? 'checked' : '' ?>
-                           class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    <label for="is_required" class="ml-2 text-sm text-gray-600">Champ obligatoire</label>
-                </div>
-                
-                <div class="space-x-4">
-                    <a href="dashboard.php" class="text-gray-600 hover:text-gray-800">Annuler</a>
-                    <button type="submit" name="save_contact_field" 
-                            class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                        Enregistrer
-                    </button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
 </body>
 </html>
