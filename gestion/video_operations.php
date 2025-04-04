@@ -1,11 +1,7 @@
 <?php
 session_start();
 
-// Vérification d'authentification
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+
 
 include __DIR__ . '/../connexion/msql.php';
 

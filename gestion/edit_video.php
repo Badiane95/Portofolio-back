@@ -3,12 +3,6 @@
 session_start();
 require __DIR__ . '/../connexion/msql.php';
 
-// Vérifier l'authentification
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
 // Récupérer les données existantes
 $video = [];
 if (isset($_GET['id'])) {
@@ -74,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Modifier la vidéo</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<?php include 'navback.php'; ?>
 <body class="bg-purple-50">
     
 <div class="container mx-auto p-6 max-w-4xl">

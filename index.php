@@ -5,6 +5,7 @@ include __DIR__ . '/connexion/msql.php';
 $home_content = [];
 $projects = [];
 $images = [];
+$fields = [];
 
 // Contenu de la page d'accueil
 $result_home = $conn->query("SELECT section_name, content FROM home_content");
@@ -30,9 +31,13 @@ if ($result_images) {
     }
 }
 
-$conn->close();
-?>
+// Formulaire de contact
+$stmt = $conn->prepare("SELECT * FROM contact_form ORDER BY display_order ASC");
+$stmt->execute();
+$fields = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
+$conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
+?>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -219,7 +224,6 @@ $conn->close();
             <p><?= htmlspecialchars($home_content['cta_text'] ?? 'Donec imperdiet consequat consequat. Suspendisse feugiat congue...') ?></p>
            <li class=button><a href="generic.php"> Mon Cv </a></li>
         </header>
-
  <!-- Section Contact -->
 <section class="main special">
     <header class="major">
@@ -229,53 +233,41 @@ $conn->close();
         <section>
             <form method="post" action="send_mail.php" id="contactForm" class="alt">
                 <div class="row gtr-uniform" style="text-align: left;">
-                    <!-- Nom -->
-                    <div class="col-6 col-12-xsmall">
-                        <label for="name">Nom</label>
-                        <input type="text" 
-                               name="name" 
-                               id="name" 
-                               placeholder="Votre nom complet"
-                               required 
-                               style="width: 100%"/>
+                    <?php foreach($fields as $field): 
+                        $options = $field['options'] ? explode(',', $field['options']) : [];
+                    ?>
+                    <div class="<?= $field['field_type'] === 'select' ? 'col-12' : 'col-6 col-12-xsmall' ?>">
+                        <label for="<?= $field['field_name'] ?>"><?= htmlspecialchars($field['label']) ?></label>
+                        
+                        <?php if($field['field_type'] === 'select'): ?>
+                            <select name="<?= $field['field_name'] ?>" 
+                                    id="<?= $field['field_name'] ?>" 
+                                    <?= $field['is_required'] ? 'required' : '' ?> 
+                                    style="width: 100%">
+                                <option value="" disabled selected>Sélectionnez un type</option>
+                                <?php foreach($options as $option): ?>
+                                <option value="<?= strtolower($option) ?>"><?= htmlspecialchars($option) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        
+                        <?php elseif($field['field_type'] === 'textarea'): ?>
+                            <textarea name="<?= $field['field_name'] ?>" 
+                                      id="<?= $field['field_name'] ?>" 
+                                      rows="5" 
+                                      placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
+                                      <?= $field['is_required'] ? 'required' : '' ?> 
+                                      style="width: 100%"></textarea>
+                        
+                        <?php else: ?>
+                            <input type="<?= $field['field_type'] ?>" 
+                                   name="<?= $field['field_name'] ?>" 
+                                   id="<?= $field['field_name'] ?>" 
+                                   placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
+                                   <?= $field['is_required'] ? 'required' : '' ?> 
+                                   style="width: 100%"/>
+                        <?php endif; ?>
                     </div>
-
-                    <!-- Email -->
-                    <div class="col-6 col-12-xsmall">
-                        <label for="email">Email</label>
-                        <input type="email" 
-                               name="email" 
-                               id="email" 
-                               placeholder="exemple@email.com"
-                               required 
-                               style="width: 100%"/>
-                    </div>
-
-                    <!-- Type de contact -->
-                    <div class="col-12">
-                        <label for="contact_type">Type de contact</label>
-                        <select name="contact_type" 
-                                id="contact_type" 
-                                required 
-                                style="width: 100%">
-                            <option value="" disabled selected>Sélectionnez un type</option>
-                            <option value="general">Général</option>
-                            <option value="support">Support</option>
-                            <option value="business">Stage</option>
-                            <option value="alternance">Alternance</option>
-                        </select>
-                    </div>
-
-                    <!-- Message -->
-                    <div class="col-12">
-                        <label for="message">Message</label>
-                        <textarea name="message" 
-                                  id="message" 
-                                  rows="5" 
-                                  placeholder="Écrivez votre message ici..."
-                                  required 
-                                  style="width: 100%"></textarea>
-                    </div>
+                    <?php endforeach; ?>
 
                     <!-- Bouton Submit -->
                     <div class="col-12" style="text-align: center;">

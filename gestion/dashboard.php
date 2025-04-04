@@ -147,52 +147,13 @@ while($row = $result_home_content->fetch_assoc()){
                     <?php endif; ?>
                 </div>
             </section>
-            <section class="space-y-8">
-    <!-- Formulaire d'édition/ajout -->
-    <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl shadow-xl p-8 border border-purple-100">
-        <h2 class="text-2xl font-bold bg-purple-600 text-white px-4 py-3 rounded-t-lg -m-8 mb-6 shadow-md">
-            <?= isset($edit_video) ? 'Modifier la vidéo' : 'Ajouter une nouvelle vidéo' ?>
-        </h2>
-        
-        <form method="POST" action="video_operations.php" class="space-y-6">
-            <?php if (isset($edit_video)): ?>
-                <input type="hidden" name="id" value="<?= $edit_video['id'] ?>">
-            <?php endif; ?>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-purple-700">Titre de la vidéo</label>
-                    <input type="text" name="title" required 
-                        value="<?= isset($edit_video) ? htmlspecialchars($edit_video['title']) : '' ?>"
-                        class="w-full px-4 py-3 border-2 border-purple-100 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
-                </div>
-                
-                <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-purple-700">URL YouTube (embed)</label>
-                    <input type="url" name="video_url" 
-                        pattern="https://www\.youtube\.com/embed/.+" 
-                        value="<?= isset($edit_video) ? htmlspecialchars($edit_video['video_url']) : '' ?>"
-                        class="w-full px-4 py-3 border-2 border-purple-100 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-                        placeholder="https://www.youtube.com/embed/ID_VIDEO">
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <label class="block text-sm font-semibold text-purple-700">Description</label>
-                <textarea name="description" rows="4"
-                    class="w-full px-4 py-3 border-2 border-purple-100 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"><?= 
-                        isset($edit_video) ? htmlspecialchars($edit_video['description']) : '' ?></textarea>
-            </div>
-
-            <button type="submit" name="<?= isset($edit_video) ? 'update_video' : 'add_video' ?>" 
-                class="w-full lg:w-auto px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all">
-                <?= isset($edit_video) ? 'Mettre à jour' : 'Ajouter la vidéo' ?>
-            </button>
-        </form>
-    </div>
-
-    <!-- Liste des vidéos -->
+    
+<section>
+  <!-- Liste des vidéos -->
 <div class="space-y-6">
+<h2 class="text-4xl font-bold text-purple-800 mb-4">
+                Mes Projet vidéos
+            </h2>
     <?php
     $videos = $conn->query("SELECT * FROM videos ORDER BY created_at DESC");
     while($video = $videos->fetch_assoc()):
@@ -236,9 +197,96 @@ while($row = $result_home_content->fetch_assoc()){
 
 
 
+<!-- Section Gestion des Champs du Formulaire -->
+<section class="mb-8">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-800">Gestion des Champs du Formulaire</h2>
+        <a href="add_field.php" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+            <i class="fas fa-plus mr-2"></i>Ajouter un champ
+        </a>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <?php
+        $fields = $conn->query("SELECT * FROM contact_form ORDER BY display_order ASC");
+        if ($fields->num_rows > 0): ?>
+            <div class="divide-y divide-gray-200">
+                <!-- En-têtes du tableau -->
+                <div class="hidden md:grid grid-cols-12 gap-4 bg-gray-50 px-6 py-3 text-sm font-medium text-gray-500">
+                    <div class="col-span-2">Nom du champ</div>
+                    <div class="col-span-2">Type</div>
+                    <div class="col-span-3">Libellé</div>
+                    <div class="col-span-2">Ordre</div>
+                    <div class="col-span-3">Actions</div>
+                </div>
+
+                <?php while($field = $fields->fetch_assoc()): ?>
+                    <div class="group hover:bg-gray-50 transition-colors px-6 py-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                            <!-- Nom du champ -->
+                            <div class="col-span-2 font-medium text-gray-900">
+                                <?= htmlspecialchars($field['field_name']) ?>
+                            </div>
+
+                            <!-- Type de champ -->
+                            <div class="col-span-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    <?= match($field['field_type']) {
+                                        'text' => 'bg-blue-100 text-blue-800',
+                                        'email' => 'bg-green-100 text-green-800',
+                                        'select' => 'bg-purple-100 text-purple-800',
+                                        'textarea' => 'bg-yellow-100 text-yellow-800'
+                                    } ?>">
+                                    <?= ucfirst($field['field_type']) ?>
+                                </span>
+                            </div>
+
+                            <!-- Libellé -->
+                            <div class="col-span-3 text-gray-600">
+                                <?= htmlspecialchars($field['label']) ?>
+                            </div>
+
+                            <!-- Ordre d'affichage -->
+                            <div class="col-span-2">
+                                <form method="POST" action="edit_field.php" class="flex items-center gap-2">
+                                    <input type="number" name="display_order" value="<?= $field['display_order'] ?>" 
+                                           class="w-16 px-2 py-1 border rounded" min="1">
+                                    <input type="hidden" name="id" value="<?= $field['id'] ?>">
+                                    <button type="submit" name="update_order" 
+                                            class="text-purple-600 hover:text-purple-900">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="col-span-3 flex items-center gap-4">
+                                <a href="edit_field.php?id=<?= $field['id'] ?>" 
+                                   class="text-indigo-600 hover:text-indigo-900">
+                                   <i class="fas fa-edit mr-1"></i>Modifier
+                                </a>
+                                <span class="text-gray-300">|</span>
+                                <form method="POST" action="delete_field.php" onsubmit="return confirm('Êtes-vous sûr ?')">
+    <input type="hidden" name="id" value="<?= $field['id'] ?>">
+    <button type="submit" class="text-red-600 hover:text-red-900">
+        <i class="fas fa-trash mr-1"></i>Supprimer
+    </button>
+</form>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else: ?>
+            <div class="p-6 text-gray-500">Aucun champ configuré</div>
+        <?php endif; ?>
+    </div>
+</section>
+<section> 
             <!-- Section de gestion du contenu de la page d'accueil -->
+            <h2 class="text-2xl font-bold text-purple-700 mb-6 border-l-4 border-purple-500 pl-4">Gestion du contenu principal</h2>
             <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-purple-50">
-                <h2 class="text-2xl font-bold text-purple-700 mb-6 border-l-4 border-purple-500 pl-4">Gestion du contenu principal</h2>
+              
 
                 <form method="POST" action="update_content.php" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -472,7 +520,7 @@ while($row = $result_home_content->fetch_assoc()){
                     </div>
                 </form>
             </div>
-            
+</section>
             <!-- Liste des CV existants -->
             <?php
             $query = "SELECT * FROM cv ORDER BY date_ajout DESC";

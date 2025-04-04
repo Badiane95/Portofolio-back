@@ -1,54 +1,44 @@
 <?php
 // delete_video.php
 session_start();
-require __DIR__ . '/../connexion/msql.php';
+require __DIR__ . '/../connexion/msql.php'; // Chemin vers la connexion à la base de données
 
-// Vérifier les permissions utilisateur
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    $_SESSION['error'] = "Accès non autorisé";
-    header("Location: dashboard.php");
-    exit();
-}
 
+// Vérifier si un ID est passé en paramètre
 if (isset($_GET['id'])) {
-    $video_id = intval($_GET['id']);
-    
+    $video_id = intval($_GET['id']); // Convertir l'ID en entier pour éviter les injections SQL
+
     try {
-        // Vérifier l'existence de la vidéo
+        // Vérifier si la vidéo existe
         $stmt_check = $conn->prepare("SELECT id FROM videos WHERE id = ?");
         $stmt_check->bind_param("i", $video_id);
         $stmt_check->execute();
         $result = $stmt_check->get_result();
-        
+
         if ($result->num_rows === 0) {
             throw new Exception("Vidéo introuvable");
         }
-        
-        // Suppression sécurisée
+
+        // Supprimer la vidéo
         $stmt = $conn->prepare("DELETE FROM videos WHERE id = ?");
         $stmt->bind_param("i", $video_id);
-        
+
         if ($stmt->execute()) {
             $_SESSION['message'] = "Vidéo supprimée avec succès";
-            // Audit log
-            $log_stmt = $conn->prepare("INSERT INTO audit_logs (user_id, action, target) VALUES (?, ?, ?)");
-            $log_action = "DELETE_VIDEO";
-            $log_stmt->bind_param("iss", $_SESSION['user_id'], $log_action, $video_id);
-            $log_stmt->execute();
         } else {
-            throw new Exception("Erreur de suppression");
+            throw new Exception("Erreur lors de la suppression");
         }
-        
     } catch (Exception $e) {
         $_SESSION['error'] = $e->getMessage();
     } finally {
-        $stmt_check->close();
+        // Libérer les ressources et rediriger
+        if (isset($stmt_check)) $stmt_check->close();
         if (isset($stmt)) $stmt->close();
-        header("Location: dashboard.php");
+        header("Location: dashboard.php"); // Redirection après suppression
         exit();
     }
 } else {
-    $_SESSION['error'] = "ID vidéo non spécifié";
+    $_SESSION['error'] = "Aucun ID vidéo spécifié";
     header("Location: dashboard.php");
     exit();
 }

@@ -7,6 +7,7 @@
 </head>
 <body>
     <section class="space-y-8">
+    <?php include 'navback.php'; ?>
         <!-- Formulaire d'édition/ajout -->
         <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl shadow-xl p-8 border border-purple-100">
             <h2 class="text-2xl font-bold bg-purple-600 text-white px-4 py-3 rounded-t-lg -m-8 mb-6 shadow-md">
