@@ -85,52 +85,63 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
 
            
 
-            <!-- Section Galerie 
-            <section id="gallery" class="main special">
-                <header class="major">
-                    <h2><?= htmlspecialchars($home_content['gallery_title'] ?? 'Galerie Photos') ?></h2>
-                </header>
-                
-                <div class="box alt">
-                    <div class="row gtr-uniform">
-                        <?php if(!empty($images)): ?>
-                            <?php foreach($images as $image): ?>
-                                <div class="col-4 col-6-medium col-12-small">
-                                    <article class="box style2">
-                                        <a href="lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>" 
-                                           class="image fit" 
-                                           target="_blank"
-                                           title="Voir en grand">
-                                            <img src="lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>" 
-                                                 alt="<?= htmlspecialchars($image['filename']) ?>" />
+          <!-- Section Galerie -->
+<section id="gallery" class="main special">
+    <header class="major">
+        <h2><?= htmlspecialchars($home_content['gallery_title'] ?? 'Galerie Photos') ?></h2>
+    </header>
+
+    <div class="box alt">
+        <div class="row gtr-uniform">
+            <?php if (!empty($images)): ?>
+                <?php foreach ($images as $image): ?>
+                    <div class="col-4 col-6-medium col-12-small">
+                        <article class="box style2">
+                            <!-- Titre de l'image -->
+                            <h3 class="title"><?= htmlspecialchars($image['title']) ?></h3>
+
+                            <!-- Image -->
+                            <a href="lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>"
+                               class="image fit"
+                               target="_blank"
+                               title="Voir en grand">
+                                <img src="lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>"
+                                     alt="<?= htmlspecialchars($image['filename']) ?>" />
+                            </a>
+
+                            <!-- Détails et actions -->
+                            <div class="inner">
+                                <p class="small">
+                                    <strong>Uploadé le :</strong>
+                                    <?= date('d/m/Y', strtotime($image['upload_date'])) ?>
+
+                                    <?php if (isset($_SESSION['admin'])): ?>
+                                        <br>
+                                        <a href="gestion/edit_image.php?id=<?= $image['id'] ?>"
+                                           class="icon solid fa-edit"
+                                           style="color: #6c757d; margin-top: 0.5rem;">
                                         </a>
-                                        <div class="inner">
-                                            <p class="small">
-                                                <strong>Uploadé le :</strong> 
-                                                <?= date('d/m/Y', strtotime($image['upload_date'])) ?>
-                                                
-                                                <?php if(isset($_SESSION['admin'])): ?>
-                                                    <br>
-                                                    <a href="gestion/delete_image.php?id=<?= $image['id'] ?>" 
-                                                       class="icon solid fa-trash"
-                                                       onclick="return confirm('Supprimer cette image définitivement ?')"
-                                                       style="color: #e74c3c; margin-top: 0.5rem;">
-                                                    </a>
-                                                <?php endif; ?>
-                                            </p>
-                                        </div>
-                                    </article>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="col-12">
-                                <p>Aucune image disponible pour le moment.</p>
+                                        <a href="gestion/delete_image.php?id=<?= $image['id'] ?>"
+                                           class="icon solid fa-trash"
+                                           onclick="return confirm('Supprimer cette image définitivement ?')"
+                                           style="color: #e74c3c; margin-top: 0.5rem;">
+                                        </a>
+                                    <?php endif; ?>
+                                </p>
                             </div>
-                        <?php endif; ?>
+                        </article>
                     </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12">
+                    <p>Aucune image disponible pour le moment.</p>
                 </div>
-            </section>
-            -->
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+          
             <!-- Section Introduction -->
             <section id="introduction" class="main">
                 <div class="spotlight">

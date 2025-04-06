@@ -779,21 +779,32 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
         <h2 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
             Liste des Images
         </h2>
-        
+
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <?php
             $query = "SELECT * FROM images ORDER BY upload_date DESC";
             $result_images = $conn->query($query);
             while ($image = $result_images->fetch_assoc()): ?>
                 <div class="bg-white rounded-lg border border-purple-100 hover:shadow-lg transition-shadow">
-                    <img src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>" 
-                         alt="<?= htmlspecialchars($image['filename']) ?>" 
-                         class="w-full h-48 object-cover border-b border-purple-100">
+                    <!-- Titre de l'image -->
+                    <div class="p-4 border-b border-purple-100">
+                        <h3 class="text-lg font-semibold text-gray-900 truncate"><?= htmlspecialchars($image['title']) ?></h3>
+                    </div>
+
+                    <!-- Image -->
+                    <img src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>"
+                         alt="<?= htmlspecialchars($image['filename']) ?>"
+                         class="w-full h-48 object-cover">
+
+                    <!-- Détails et actions -->
                     <div class="p-4 space-y-2">
-                        <p class="text-sm font-medium text-gray-900 truncate"><?= htmlspecialchars($image['filename']) ?></p>
                         <p class="text-xs text-gray-500">Ajouté le <?= date('d/m/Y', strtotime($image['upload_date'])) ?></p>
-                        <div class="pt-2">
-                            <a href="delete_image.php?id=<?= $image['id'] ?>" 
+                        <div class="flex space-x-3">
+                            <a href="edit_image.php?id=<?= $image['id'] ?>"
+                               class="text-purple-600 hover:text-purple-900 text-sm transition-colors">
+                                <i class="fas fa-edit mr-1"></i>Modifier
+                            </a>
+                            <a href="delete_image.php?id=<?= $image['id'] ?>"
                                class="text-red-600 hover:text-red-900 text-sm transition-colors"
                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette image ?');">
                                 <i class="fas fa-trash mr-1"></i>Supprimer
@@ -805,6 +816,8 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 </section>
+
+
    
     <script src="https://cdn.tiny.cloud/1/votre-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     
