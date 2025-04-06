@@ -52,6 +52,18 @@ $home_data = [];
 while($row = $result_home_content->fetch_assoc()){
     $home_data[$row['section_name']] = $row['content'];
 }
+// Suppression
+if (isset($_GET['delete'])) {
+    $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+    $stmt = $conn->prepare("DELETE FROM skills WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $_SESSION['message'] = "Compétence supprimée !";
+}
+
+// Récupération des compétences
+$result = $conn->query("SELECT * FROM skills ORDER BY created_at DESC");
+$skills = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -402,6 +414,7 @@ while($row = $result_home_content->fetch_assoc()){
                                 <textarea name="about_text" id="about_text" rows="3"
                                           class="w-full p-2 border border-purple-200 rounded-md"><?= htmlspecialchars($home_data['about_text'] ?? '') ?></textarea>
                             </div>
+                            
                         </div>
 
                         <!-- Section Projets -->
@@ -608,6 +621,60 @@ while($row = $result_home_content->fetch_assoc()){
         }
     }
     </script>
+ <!-- section compétences -->
+<div class="max-w-8xl mx-auto py-8 px-4">
+    <div class="bg-white shadow-xl rounded-lg p-8 border border-purple-100">
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-purple-800">
+                    <i class="fas fa-tools mr-2"></i>Gestion des Compétences
+                </h1>
+            </div>
+
+            <?php if(isset($_SESSION['message'])): ?>
+            <div class="bg-green-100 p-4 mb-6 rounded-lg border border-green-200">
+                <?= $_SESSION['message'] ?>
+                <?php unset($_SESSION['message']); ?>
+            </div>
+            <?php endif; ?>
+
+            <div class="rounded-lg shadow overflow-hidden border border-gray-100">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-purple-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Icône</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Titre</th>
+                            <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Description</th>
+                            <th class="px-6 py-3 text-center text-sm font-medium text-purple-800">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach($skills as $skill): ?>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <i class="fas fa-<?= htmlspecialchars($skill['icon']) ?> text-purple-600 text-lg"></i>
+                            </td>
+                            <td class="px-6 py-4 font-medium text-gray-900"><?= htmlspecialchars($skill['title']) ?></td>
+                            <td class="px-6 py-4 text-gray-600"><?= htmlspecialchars($skill['description']) ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <a href="edit_skill.php?id=<?= $skill['id'] ?>" 
+                                   class="text-purple-600 hover:text-purple-800 mr-4 transition-colors">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="delete_skill.php?delete=1&id=<?= $skill['id'] ?>" 
+   class="text-red-600 hover:text-red-800 transition-colors"
+   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">
+    <i class="fas fa-trash"></i>
+</a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Liste des adhérents -->
 <section class="mb-8">

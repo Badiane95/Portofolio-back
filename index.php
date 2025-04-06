@@ -222,58 +222,59 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
         <header class="major">
             <h2><?= htmlspecialchars($home_content['cta_title'] ?? 'Congue imperdiet') ?></h2>
             <p><?= htmlspecialchars($home_content['cta_text'] ?? 'Donec imperdiet consequat consequat. Suspendisse feugiat congue...') ?></p>
-           <li class=button><a href="generic.php"> Mon Cv </a></li>
+            <li style="list-style: none;"><a href="generic.php" class="button">Mon CV</a></li>
+
         </header>
- <!-- Section Contact -->
+        
+<!-- Section Contact -->
 <section class="main special">
     <header class="major">
         <h2>Me contacter</h2>
     </header>
     <div class="split style1">
         <section>
+            <div id="message" class="hidden p-4 mb-4 rounded-lg text-center"></div>
+
             <form method="post" action="send_mail.php" id="contactForm" class="alt">
                 <div class="row gtr-uniform" style="text-align: left;">
-                    <?php foreach($fields as $field): 
-                        $options = $field['options'] ? explode(',', $field['options']) : [];
-                    ?>
+                    <?php foreach($fields as $field): ?>
                     <div class="<?= $field['field_type'] === 'select' ? 'col-12' : 'col-6 col-12-xsmall' ?>">
-                        <label for="<?= $field['field_name'] ?>"><?= htmlspecialchars($field['label']) ?></label>
+                        <label for="<?= $field['field_name'] ?>">
+                            <?= htmlspecialchars($field['label']) ?>
+                            <?= $field['is_required'] ? '<span class="text-red-500">*</span>' : '' ?>
+                        </label>
                         
                         <?php if($field['field_type'] === 'select'): ?>
                             <select name="<?= $field['field_name'] ?>" 
-                                    id="<?= $field['field_name'] ?>" 
-                                    <?= $field['is_required'] ? 'required' : '' ?> 
-                                    style="width: 100%">
-                                <option value="" disabled selected>Sélectionnez un type</option>
-                                <?php foreach($options as $option): ?>
-                                <option value="<?= strtolower($option) ?>"><?= htmlspecialchars($option) ?></option>
+                                    class="w-full p-2 border rounded">
+                                <option value="" disabled selected>Choisir...</option>
+                                <?php foreach(explode(',', $field['options']) as $option): ?>
+                                <option value="<?= strtolower(trim($option)) ?>">
+                                    <?= htmlspecialchars(trim($option)) ?>
+                                </option>
                                 <?php endforeach; ?>
                             </select>
                         
                         <?php elseif($field['field_type'] === 'textarea'): ?>
                             <textarea name="<?= $field['field_name'] ?>" 
-                                      id="<?= $field['field_name'] ?>" 
-                                      rows="5" 
-                                      placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
-                                      <?= $field['is_required'] ? 'required' : '' ?> 
-                                      style="width: 100%"></textarea>
+                                      class="w-full p-2 border rounded"
+                                      rows="5"
+                                      placeholder="<?= htmlspecialchars($field['placeholder']) ?>"></textarea>
                         
                         <?php else: ?>
                             <input type="<?= $field['field_type'] ?>" 
-                                   name="<?= $field['field_name'] ?>" 
-                                   id="<?= $field['field_name'] ?>" 
-                                   placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
-                                   <?= $field['is_required'] ? 'required' : '' ?> 
-                                   style="width: 100%"/>
+                                   class="w-full p-2 border rounded"
+                                   name="<?= $field['field_name'] ?>"
+                                   placeholder="<?= htmlspecialchars($field['placeholder']) ?>">
                         <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
 
-                    <!-- Bouton Submit -->
-                    <div class="col-12" style="text-align: center;">
-                        <ul class="actions">
-                            <li><input type="submit" value="Envoyer" class="button primary" /></li>
-                        </ul>
+                    <div class="col-12 text-center mt-6">
+                        <button type="submit" 
+                                class="bg-purple-600 text-white px-1 py-1 rounded-lg hover:bg-purple-700 transition-all">
+                            <i class="fas fa-paper-plane mr-2"></i>Envoyer
+                        </button>
                     </div>
                 </div>
             </form>
@@ -281,21 +282,127 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
     </div>
 </section>
 
-  
-        </div>
+</div>
 
        
-    </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/jquery.scrollex.min.js"></script>
-    <script src="assets/js/jquery.scrolly.min.js"></script>
-    <script src="assets/js/browser.min.js"></script>
-    <script src="assets/js/breakpoints.min.js"></script>
-    <script src="assets/js/util.js"></script>
-    <script src="assets/js/main.js"></script>
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/jquery.scrollex.min.js"></script>
+<script src="assets/js/jquery.scrolly.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
 
+<script>
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const messageDiv = document.getElementById('message');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const progressBar = document.createElement('div');
+
+    // Configuration initiale
+    submitBtn.classList.add('cursor-wait');
+    messageDiv.innerHTML = '';
+    messageDiv.style.display = 'none';
+
+    // Création de la barre de progression
+    progressBar.className = 'h-1 bg-purple-600 absolute bottom-0 left-0';
+    progressBar.style.width = '0%';
+    messageDiv.appendChild(progressBar);
+
+    // État de chargement
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+        <span class="flex items-center justify-center">
+            <i class="fas fa-spinner fa-spin mr-2"></i>
+            Envoi en cours...
+        </span>
+    `;
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form)
+        });
+
+        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Animation du message
+        messageDiv.innerHTML = `
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas ${data.status === 'success' ? 'fa-check-circle' : 'fa-times-circle'} 
+                        text-${data.status === 'success' ? 'green' : 'red'}-500 text-xl"></i>
+                    <span>${data.message}</span>
+                </div>
+                <button onclick="this.parentElement.parentElement.style.display = 'none'" 
+                        class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        messageDiv.className = `rounded-lg shadow-lg mb-6 overflow-hidden ${
+            data.status === 'success' 
+            ? 'bg-green-50 border border-green-200' 
+            : 'bg-red-50 border border-red-200'
+        }`;
+        
+        messageDiv.style.display = 'block';
+        messageDiv.animate([
+            { opacity: 0, transform: 'translateY(-20px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+        ], { duration: 300 });
+
+        if(data.status === 'success') {
+            form.reset();
+            // Animation de la barre de progression
+            progressBar.animate([
+                { width: '0%' },
+                { width: '100%' }
+            ], { 
+                duration: 5000,
+                easing: 'linear'
+            }).onfinish = () => {
+                messageDiv.animate([
+                    { opacity: 1 },
+                    { opacity: 0 }
+                ], { duration: 500 }).onfinish = () => {
+                    messageDiv.style.display = 'none';
+                };
+            };
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        messageDiv.innerHTML = `
+            <div class="flex items-center p-4">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3 text-xl"></i>
+                <span>${error.message || "Erreur lors de la communication avec le serveur"}</span>
+            </div>
+        `;
+        messageDiv.className = 'bg-red-50 border border-red-200 rounded-lg shadow-lg mb-6';
+        messageDiv.style.display = 'block';
+        messageDiv.animate([
+            { opacity: 0, transform: 'scale(0.95)' },
+            { opacity: 1, transform: 'scale(1)' }
+        ], { duration: 200 });
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('cursor-wait');
+        submitBtn.innerHTML = `
+            <i class="fas fa-paper-plane mr-2"></i>Envoyer
+        `;
+    }
+});
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
 </body>
 
         <!-- Footer -->

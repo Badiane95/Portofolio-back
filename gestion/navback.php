@@ -39,6 +39,10 @@
                             <i class="fas fa-envelope"></i>
                             Formulaire Contact
                         </a>
+                        <a href="add_skill.php" class="px-4 py-3 rounded-md text-sm font-medium hover:bg-purple-600 transition duration-300 flex items-center gap-2">
+                            <i class="fas fa-tools"></i>
+                            Compétences
+                        </a>
                     </div>
                 </div>
                 <div class="ml-8">

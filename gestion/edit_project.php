@@ -1,10 +1,15 @@
 <?php
 session_start();
 
-// Vérification de session admin sécurisée
+// Activer le débogage
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Vérification de session admin
 if (!isset($_SESSION['admin']) || !$_SESSION['admin']) {
-    header("HTTP/1.1 403 Forbidden");
-    exit("Accès refusé");
+    $_SESSION['error'] = "Accès non autorisé";
+    header("Location: login.php");
+    exit();
 }
 
 require __DIR__ . '/../connexion/msql.php';
@@ -14,18 +19,16 @@ $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/BUT2/S4/Portofolio-Back/lib/uploadArt
 $allowedMimeTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 $maxFileSize = 5 * 1024 * 1024; // 5 Mo
 
-$message = '';
-$error = '';
-$project = [];
-
 try {
-    // Récupération de l'ID avec validation
-    $id = filter_input(INPUT_REQUEST, 'id', FILTER_VALIDATE_INT, [
+    // Récupération et validation de l'ID
+    $id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT, [
         'options' => ['min_range' => 1]
-    ]) ?? null;
+    ]) : null;
 
     if (!$id) {
-        throw new Exception("ID de projet invalide");
+        $_SESSION['error'] = "ID de projet invalide";
+        header("Location: dashboard.php");
+        exit();
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -34,16 +37,15 @@ try {
             throw new Exception("Validation de formulaire invalide");
         }
 
-        // Récupération et validation des données
-        $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_SPECIAL_CHARS);
-        $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
-        $start_date = $_POST['start_date'] ?? null;
-        $end_date = $_POST['end_date'] ?? null;
-        $status = in_array($_POST['status'] ?? '', ['planned', 'in_progress', 'completed']) 
-                ? $_POST['status'] 
-                : 'planned';
-        $alt_text = filter_input(INPUT_POST, 'alt_text', FILTER_SANITIZE_SPECIAL_CHARS);
-        $existing_image = $_POST['existing_image'] ?? '';
+        // Récupération des données
+        $name = htmlspecialchars($_POST['name']);
+        $description = htmlspecialchars($_POST['description']);
+        $start_date = $_POST['start_date'];
+        $end_date = $_POST['end_date'];
+        $status = in_array($_POST['status'], ['planned', 'in_progress', 'completed']) ? $_POST['status'] : 'planned';
+        $alt_text = htmlspecialchars($_POST['alt_text']);
+        $project_link = htmlspecialchars($_POST['project_link']);
+        $existing_image = $_POST['existing_image'];
 
         // Validation des dates
         if ($end_date && strtotime($end_date) < strtotime($start_date)) {
@@ -58,24 +60,23 @@ try {
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             // Validation du fichier
             if ($_FILES['image']['size'] > $maxFileSize) {
-                throw new Exception("Le fichier dépasse la taille maximale autorisée (5 Mo)");
+                throw new Exception("Fichier trop volumineux (max 5 Mo)");
             }
 
             $mimeType = $fileInfo->file($_FILES['image']['tmp_name']);
-            
             if (!array_key_exists($mimeType, $allowedMimeTypes)) {
                 throw new Exception("Type de fichier non autorisé");
             }
 
-            // Génération nom de fichier sécurisé
+            // Génération nom sécurisé
             $newFileName = bin2hex(random_bytes(16)) . '.' . $allowedMimeTypes[$mimeType];
             $fileDestination = $uploadDir . $newFileName;
 
             if (!move_uploaded_file($_FILES['image']['tmp_name'], $fileDestination)) {
-                throw new Exception("Échec de l'enregistrement du fichier");
+                throw new Exception("Échec de l'enregistrement");
             }
 
-            // Conservation ancienne image pour suppression
+            // Récupération ancienne image
             $stmt = $conn->prepare("SELECT image_path FROM projects WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
@@ -85,9 +86,8 @@ try {
             $relativePath = '/BUT2/S4/Portofolio-Back/lib/uploadArticle/' . $newFileName;
         }
 
-        // Mise à jour en base avec transaction
+        // Mise à jour en base
         $conn->begin_transaction();
-
         try {
             $stmt = $conn->prepare("UPDATE projects SET 
                 name = ?,
@@ -97,10 +97,11 @@ try {
                 status = ?,
                 image_path = ?,
                 alt_text = ?,
+                project_link = ?,
                 updated_at = NOW() 
                 WHERE id = ?");
 
-            $stmt->bind_param("sssssssi", 
+            $stmt->bind_param("ssssssssi", 
                 $name,
                 $description,
                 $start_date,
@@ -108,49 +109,56 @@ try {
                 $status,
                 $relativePath,
                 $alt_text,
+                $project_link,
                 $id
             );
 
             if (!$stmt->execute()) {
-                throw new Exception("Erreur de mise à jour : " . $stmt->error);
+                throw new Exception("Erreur SQL : " . $stmt->error);
             }
 
-            // Suppression ancienne image si changement
+            // Suppression ancienne image
             if ($oldImage && file_exists($_SERVER['DOCUMENT_ROOT'] . $oldImage)) {
                 unlink($_SERVER['DOCUMENT_ROOT'] . $oldImage);
             }
 
             $conn->commit();
-            $message = "Projet mis à jour avec succès!";
-            $stmt->close();
+            $_SESSION['success'] = "Projet mis à jour avec succès!";
+            header("Location: edit_project.php?id=$id");
+            exit();
 
         } catch (Exception $e) {
             $conn->rollback();
-            if (isset($fileDestination) unlink($fileDestination);
+            if (isset($fileDestination) && file_exists($fileDestination)) {
+                unlink($fileDestination);
+            }
             throw $e;
         }
+    }
 
-    } else {
-        // Récupération des données existantes
-        $stmt = $conn->prepare("SELECT * FROM projects WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $project = $result->fetch_assoc();
-        
-        if (!$project) {
-            throw new Exception("Projet introuvable");
-        }
-        $stmt->close();
+    // Récupération données existantes
+    $stmt = $conn->prepare("SELECT * FROM projects WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $project = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$project) {
+        $_SESSION['error'] = "Projet introuvable";
+        header("Location: dashboard.php");
+        exit();
     }
 
 } catch (Exception $e) {
-    $error = $e->getMessage();
+    $_SESSION['error'] = $e->getMessage();
+    header("Location: edit_project.php?id=$id");
+    exit();
 } finally {
-    // Génération token CSRF
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $conn->close();
 }
-?> 
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -158,7 +166,6 @@ try {
     <title>Modifier le projet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="dropZone.js" defer></script>
 </head>
 <body class="bg-gray-100">
     <?php include 'navback.php'; ?>
@@ -170,110 +177,92 @@ try {
                     <i class="fas fa-project-diagram mr-2"></i>Modifier le projet
                 </h2>
 
-                <?php if($message): ?>
+                <?php if(isset($_SESSION['success'])): ?>
                 <div class="p-4 mb-6 text-green-800 bg-green-100 rounded-lg">
-                    <?= htmlspecialchars($message) ?>
-                </div>
-                <?php endif; ?>
-                
-                <?php if($error): ?>
-                <div class="p-4 mb-6 text-red-800 bg-red-100 rounded-lg">
-                    <?= htmlspecialchars($error) ?>
+                    <?= $_SESSION['success'] ?>
+                    <?php unset($_SESSION['success']); ?>
                 </div>
                 <?php endif; ?>
 
-                <form action="edit_project.php" method="POST" enctype="multipart/form-data" class="space-y-6">
-                    <input type="hidden" name="id" value="<?= htmlspecialchars($project['id'] ?? '') ?>">
+                <?php if(isset($_SESSION['error'])): ?>
+                <div class="p-4 mb-6 text-red-800 bg-red-100 rounded-lg">
+                    <?= $_SESSION['error'] ?>
+                    <?php unset($_SESSION['error']); ?>
+                </div>
+                <?php endif; ?>
+
+                <form action="edit_project.php?id=<?= $id ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <input type="hidden" name="id" value="<?= $id ?>">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Nom du projet -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
-                            <input type="text" name="name" 
-                                   value="<?= htmlspecialchars($project['name'] ?? '') ?>" 
-                                   required
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <input type="text" name="name" value="<?= htmlspecialchars($project['name']) ?>" 
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500" required>
                         </div>
 
-                        <!-- Statut -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Statut *</label>
-                            <select name="status" 
-                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                                <option value="planned" <?= ($project['status'] ?? '') === 'planned' ? 'selected' : '' ?>>Planifié</option>
-                                <option value="in_progress" <?= ($project['status'] ?? '') === 'in_progress' ? 'selected' : '' ?>>En cours</option>
-                                <option value="completed" <?= ($project['status'] ?? '') === 'completed' ? 'selected' : '' ?>>Terminé</option>
+                            <select name="status" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="planned" <?= $project['status'] === 'planned' ? 'selected' : '' ?>>Planifié</option>
+                                <option value="in_progress" <?= $project['status'] === 'in_progress' ? 'selected' : '' ?>>En cours</option>
+                                <option value="completed" <?= $project['status'] === 'completed' ? 'selected' : '' ?>>Terminé</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Description -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" rows="4"
-                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"><?= htmlspecialchars($project['description'] ?? '') ?></textarea>
+                        <textarea name="description" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"><?= htmlspecialchars($project['description']) ?></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Dates -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Date de début</label>
-                            <input type="date" name="start_date" 
-                                   value="<?= htmlspecialchars($project['start_date'] ?? '') ?>"
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <input type="date" name="start_date" value="<?= htmlspecialchars($project['start_date']) ?>" 
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
-                            <input type="date" name="end_date" 
-                                   value="<?= htmlspecialchars($project['end_date'] ?? '') ?>"
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <input type="date" name="end_date" value="<?= htmlspecialchars($project['end_date']) ?>" 
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
                         </div>
                     </div>
 
-                    <!-- Image -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Image du projet</label>
-                        <div id="drop-zone" class="border-2 border-dashed border-purple-200 rounded-lg p-6 cursor-pointer hover:border-purple-400 transition-colors">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                        <div class="border-2 border-dashed border-purple-200 rounded-lg p-6 cursor-pointer hover:border-purple-400" onclick="document.getElementById('image').click()">
                             <div class="text-center">
                                 <i class="fas fa-cloud-upload-alt text-4xl text-purple-400 mb-4"></i>
-                                <p class="font-medium text-gray-600">Glissez et déposez votre image ici</p>
-                                <p class="text-sm text-gray-400 mt-2">ou cliquez pour sélectionner</p>
-                                <?php if($project['image_path'] ?? ''): ?>
-                                    <img id="preview" src="<?= htmlspecialchars($project['image_path']) ?>" 
-                                         alt="<?= htmlspecialchars($project['alt_text'] ?? '') ?>" 
-                                         class="mt-4 mx-auto max-h-40 object-cover rounded-lg shadow-md">
-                                <?php else: ?>
-                                    <img id="preview" src="#" alt="Aperçu de l'image" class="mt-4 mx-auto max-h-40 hidden">
+                                <p class="font-medium text-gray-600">Glissez-déposez ou cliquez pour uploader</p>
+                                <?php if($project['image_path']): ?>
+                                    <img src="<?= $project['image_path'] ?>" alt="Preview" class="mt-4 mx-auto max-h-40 rounded-lg">
                                 <?php endif; ?>
                             </div>
                         </div>
                         <input type="file" name="image" id="image" class="hidden">
-                        <input type="hidden" name="existing_image" value="<?= htmlspecialchars($project['image_path'] ?? '') ?>">
-                    </div>
-  <!-- Lien du projet -->
-  <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Lien du projet</label>
-                        <input type="url" name="project_link"
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                               placeholder="https://example.com/project"
-                               value="<?= htmlspecialchars($_POST['project_link'] ?? '') ?>">
+                        <input type="hidden" name="existing_image" value="<?= $project['image_path'] ?>">
                     </div>
 
-                    <!-- Texte alternatif -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lien du projet</label>
+                        <input type="url" name="project_link" value="<?= htmlspecialchars($project['project_link']) ?>" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500" 
+                               placeholder="https://example.com">
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Description alternative</label>
-                        <input type="text" name="alt_text" 
-                               value="<?= htmlspecialchars($project['alt_text'] ?? '') ?>"
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                               placeholder="Décrivez l'image pour l'accessibilité">
+                        <input type="text" name="alt_text" value="<?= htmlspecialchars($project['alt_text']) ?>" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500" 
+                               placeholder="Description pour l'accessibilité">
                     </div>
 
-                    <!-- Boutons -->
                     <div class="flex justify-end border-t pt-6">
                         <div class="space-x-4">
                             <a href="dashboard.php" class="text-gray-600 hover:text-gray-800">Retour</a>
-                            <button type="submit" 
-                                    class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <button type="submit" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700">
                                 <i class="fas fa-save mr-2"></i>Enregistrer
                             </button>
                         </div>
@@ -284,6 +273,3 @@ try {
     </div>
 </body>
 </html>
-<?php 
-$conn->close();
-?>
