@@ -1,19 +1,25 @@
 <?php
+// Démarrage de la session pour gérer les messages utilisateur
 session_start();
+// Inclusion sécurisée du fichier de connexion MySQL
 include __DIR__ . '/../connexion/msql.php';
 
+// Traitement du formulaire en POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $id = intval($_POST['id']);
-    $nom = $conn->real_escape_string($_POST['nom']);
-    $link = $conn->real_escape_string($_POST['link']);
+    // Validation et sécurisation des entrées
+    $id = intval($_POST['id']); // Protection contre l'injection SQL
+    $nom = $conn->real_escape_string($_POST['nom']); // Échappement des caractères spéciaux
+    $link = $conn->real_escape_string($_POST['link']); // Idem pour le lien
 
+    // Requête préparée pour plus de sécurité
     $stmt = $conn->prepare("UPDATE social_media SET nom=?, link=? WHERE id=?");
     $stmt->bind_param("ssi", $nom, $link, $id);
     
+    // Exécution avec gestion des erreurs
     if ($stmt->execute()) {
         $_SESSION['message'] = "Modification réussie";
     } else {
-        $_SESSION['error'] = "Erreur de modification";
+        $_SESSION['error'] = "Erreur de modification: " . $stmt->error; // Ajout du message d'erreur SQL
     }
     $stmt->close();
     header("Location: dashboard.php");
@@ -23,7 +29,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Récupération des données existantes
 $media = [];
 if (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
+    $id = intval($_GET['id']); // Sécurisation de l'ID
+    
+    // Amélioration recommandée : Utiliser une requête préparée ici aussi
+    // $stmt = $conn->prepare("SELECT * FROM social_media WHERE id = ?");
+    // $stmt->bind_param("i", $id);
+    // $stmt->execute();
+    // $media = $stmt->get_result()->fetch_assoc();
+    
     $result = $conn->query("SELECT * FROM social_media WHERE id = $id");
     $media = $result->fetch_assoc();
 }
@@ -48,11 +61,12 @@ if (isset($_GET['id'])) {
                     <i class="fas fa-hashtag mr-2"></i>Modifier le réseau social
                 </h2>
 
+                <!-- Formulaire de modification -->
                 <form method="POST" action="edit_social_media.php" class="space-y-6">
                     <input type="hidden" name="id" value="<?= $media['id'] ?>">
 
                     <div class="grid grid-cols-1 gap-6">
-                        <!-- Nom -->
+                        <!-- Champ Nom -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nom du réseau *</label>
                             <input type="text" name="nom" 
@@ -62,7 +76,7 @@ if (isset($_GET['id'])) {
                                    placeholder="Ex: LinkedIn, GitHub...">
                         </div>
 
-                        <!-- Lien -->
+                        <!-- Champ Lien -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Lien du profil *</label>
                             <input type="url" name="link" 
@@ -73,7 +87,7 @@ if (isset($_GET['id'])) {
                         </div>
                     </div>
 
-                    <!-- Boutons -->
+                    <!-- Section des boutons -->
                     <div class="flex justify-end border-t pt-6">
                         <div class="space-x-4">
                             <a href="dashboard.php" class="text-gray-600 hover:text-gray-800">Annuler</a>
@@ -90,5 +104,6 @@ if (isset($_GET['id'])) {
 </body>
 </html>
 <?php
+// Fermeture de la connexion MySQL
 $conn->close();
 ?>

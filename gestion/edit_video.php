@@ -6,9 +6,9 @@ session_start();
 # CONFIGURATION DE SÉCURITÉ
 // ==================== #
 
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload');
+header('X-Content-Type-Options: nosniff'); // Protège contre le MIME-sniffing
+header('X-Frame-Options: DENY'); // Empêche le clickjacking
+header('Strict-Transport-Security: max-age=63072000; includeSubDomains; preload'); // Force HTTPS, attention à bien configurer le serveur
 
 // ==================== #
 # VÉRIFICATIONS INITIALES
@@ -28,6 +28,12 @@ require __DIR__ . '/../connexion/msql.php';
 # FONCTIONS DE SÉCURITÉ
 // ==================== #
 
+/**
+ * Valide et convertit une URL YouTube en URL d'intégration sécurisée.
+ * @param string $url L'URL YouTube à valider.
+ * @return string L'URL d'intégration sécurisée.
+ * @throws InvalidArgumentException Si l'URL n'est pas valide.
+ */
 function validateYoutubeId(string $url): string {
     $patterns = [
         '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i'
@@ -44,6 +50,11 @@ function validateYoutubeId(string $url): string {
     throw new InvalidArgumentException("❌ Format d'URL YouTube invalide");
 }
 
+/**
+ * Enregistre une action dans un fichier de log de sécurité.
+ * @param string $action L'action à enregistrer.
+ * @return void
+ */
 function logAction(string $action): void {
     $log = sprintf(
         "[%s][IP:%s][Admin:%s] %s\n",
@@ -114,24 +125,23 @@ try {
 
         // 10. Validation des longueurs
        
-if (mb_strlen($title) === 0 || mb_strlen($title) > 500) {
-    throw new InvalidArgumentException("📏 Le titre doit contenir entre 1 et 500 caractères");
-}
-
-if (mb_strlen($description) > 2000) {
-    throw new InvalidArgumentException("📏 La description ne peut excéder 2000 caractères");
-}
+        if (mb_strlen($title) === 0 || mb_strlen($title) > 500) {
+            throw new InvalidArgumentException("📏 Le titre doit contenir entre 1 et 500 caractères");
+        }
+        if (mb_strlen($description) > 2000) {
+            throw new InvalidArgumentException("📏 La description ne peut excéder 2000 caractères");
+        }
 
         // 11. Conversion URL YouTube
         $video_url = validateYoutubeId($raw_url);
 
         // 12. Mise à jour sécurisée
         $stmt = $conn->prepare("UPDATE videos SET 
-    title = ?, 
-    description = ?, 
-    video_url = ?, 
-    updated_at = NOW() 
-    WHERE id = ?");
+            title = ?, 
+            description = ?, 
+            video_url = ?, 
+            updated_at = NOW() 
+            WHERE id = ?");
 
         $stmt->bind_param("sssi", $title, $description, $video_url, $video_id);
         
@@ -177,10 +187,6 @@ if (mb_strlen($description) > 2000) {
 
 <!DOCTYPE html>
 <html lang="fr">
-<!-- Le reste du HTML reste inchangé -->
-
-<!DOCTYPE html>
-<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -218,17 +224,18 @@ if (mb_strlen($description) > 2000) {
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
                     <input type="hidden" name="video_id" value="<?= htmlspecialchars($video['id']) ?>">
 
-                   <!-- Titre -->
-<div class="relative">
-    <input type="text" name="title" 
-           value="<?= htmlspecialchars_decode($video['title'] ?? '', ENT_QUOTES) ?>" 
-           required
-           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 pr-16"
-           maxlength="500">
-    <div class="absolute right-3 bottom-2 text-xs text-gray-400">
-        <span id="title_counter"><?= 500 - mb_strlen(htmlspecialchars_decode($video['title'] ?? '')) ?></span>/500
-    </div>
-</div>
+                    <!-- Titre -->
+                    <div class="relative">
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
+                        <input type="text" id="title" name="title" 
+                            value="<?= htmlspecialchars_decode($video['title'] ?? '', ENT_QUOTES) ?>" 
+                            required
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 pr-16"
+                            maxlength="500">
+                        <div class="absolute right-3 bottom-2 text-xs text-gray-400">
+                            <span id="title_counter"><?= 500 - mb_strlen(htmlspecialchars_decode($video['title'] ?? '')) ?></span>/500
+                        </div>
+                    </div>
 
                     <!-- URL YouTube -->
                     <div>
@@ -247,10 +254,15 @@ if (mb_strlen($description) > 2000) {
                     </div>
 
                     <!-- Description -->
-                    <textarea name="description" rows="4"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-          maxlength="500"><?= 
-          htmlspecialchars_decode($video['description'] ?? '', ENT_QUOTES) ?></textarea>
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="description" name="description" rows="4"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            maxlength="2000"><?= htmlspecialchars_decode($video['description'] ?? '', ENT_QUOTES) ?></textarea>
+                         <div class="absolute right-3 bottom-2 text-xs text-gray-400">
+                            <span id="description_counter"><?= 2000 - mb_strlen(htmlspecialchars_decode($video['description'] ?? '')) ?></span>/2000
+                        </div>
+                    </div>
 
                     <!-- Boutons -->
                     <div class="flex justify-end border-t pt-6">
@@ -294,13 +306,22 @@ if (mb_strlen($description) > 2000) {
         });
     </script>
     <script>
-// Compteur de caractères en temps réel
-document.querySelector('input[name="title"]').addEventListener('input', function(e) {
-    const counter = document.getElementById('title_counter');
-    const remaining = 500 - e.target.value.length;
-    counter.textContent = remaining;
-    counter.style.color = remaining < 50 ? '#dc2626' : '#6b7280';
-});
-</script>
+        // Compteur de caractères en temps réel pour le titre
+        document.querySelector('input[name="title"]').addEventListener('input', function(e) {
+            const counter = document.getElementById('title_counter');
+            const remaining = 500 - e.target.value.length;
+            counter.textContent = remaining;
+            counter.style.color = remaining < 50 ? '#dc2626' : '#6b7280';
+        });
+    </script>
+     <script>
+        // Compteur de caractères en temps réel pour la description
+        document.querySelector('textarea[name="description"]').addEventListener('input', function(e) {
+            const counter = document.getElementById('description_counter');
+            const remaining = 2000 - e.target.value.length;
+            counter.textContent = remaining;
+            counter.style.color = remaining < 100 ? '#dc2626' : '#6b7280';
+        });
+    </script>
 </body>
 </html>

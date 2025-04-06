@@ -1,7 +1,9 @@
 <?php
-include __DIR__ . '/../connexion/msql.php';
+include __DIR__ . '/../connexion/msql.php'; // Inclut le fichier de connexion à la base de données.
 
+// Requête SQL pour sélectionner toutes les images, triées par date d'upload la plus récente.
 $query = "SELECT * FROM images ORDER BY upload_date DESC";
+// Exécution de la requête SQL.
 $result = $conn->query($query);
 ?>
 
