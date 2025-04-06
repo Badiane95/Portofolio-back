@@ -174,7 +174,7 @@ $conn->close();
                     <!-- Boutons -->
                     <div class="flex justify-end border-t pt-6">
                         <div class="space-x-4">
-                            <a href="manage_skills.php" class="text-gray-600 hover:text-gray-800">Annuler</a>
+                            <a href="dashboard.php" class="text-gray-600 hover:text-gray-800">Annuler</a>
                             <button type="submit" 
                                     class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
                                 <i class="fas fa-save mr-2"></i>Enregistrer

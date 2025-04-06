@@ -36,6 +36,7 @@ $stmt = $conn->prepare("SELECT * FROM contact_form ORDER BY display_order ASC");
 $stmt->execute();
 $fields = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
+
 $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
 ?>
 <!DOCTYPE HTML>
@@ -44,14 +45,13 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
     <title>Portfolio</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/main.css"/>
     <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
     <link rel="shortcut icon" href="images/favicon.png" type="image/png">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   
 
 </head>
+
 <body class="is-preload">
 
     <!-- Wrapper -->
@@ -175,28 +175,22 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                 </footer>
             </section>
 
-           <!-- Section Statistiques -->
+<!-- Section Statistiques -->
 <section id="second" class="main special">
     <header class="major">
         <h2><?= htmlspecialchars($home_content['second_title'] ?? 'Ipsum consequat') ?></h2>
         <p><?= htmlspecialchars($home_content['second_text'] ?? 'Donec imperdiet consequat consequat. Suspendisse feugiat congue...') ?></p>
     </header>
 
-    <ul class="statistics">
-        <?php
-        $default_icons = ['fa-solid fa-code-branch', 'fa-solid fa-folder-open', 'fa-solid fa-signal', 'fa-solid fa-laptop', 'fa-solid fa-gem'];
-        $default_numbers = ['5,120', '8,192', '2,048', '4,096', '1,024'];
-        $default_labels = ['Etiam', 'Magna', 'Tempus', 'Aliquam', 'Nullam'];
-
-        for($i = 1; $i <= 5; $i++):
-        ?>
-            <li class="style<?= $i ?>">
-                <span class="icon <?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? $default_icons[$i-1]) ?>"></span>
-                <strong><?= htmlspecialchars($home_content["second_stat{$i}_number"] ?? $default_numbers[$i-1]) ?></strong>
-                <?= htmlspecialchars($home_content["second_stat{$i}_label"] ?? $default_labels[$i-1]) ?>
-            </li>
+    <div class="flex flex-wrap justify-center gap-4 mx-auto max-w-6xl px-4 sm:px-6">
+        <?php for($i = 1; $i <= 5; $i++): ?>
+            <div class="text-center p-3 bg-white rounded-lg shadow w-full sm:w-auto sm:min-w-[150px] md:min-w-[180px]">
+                <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-code-branch') ?> text-3xl text-purple-600 mb-4"></i>
+                <div class="font-bold text-xl mb-2"><?= htmlspecialchars($home_content["second_stat{$i}_number"] ?? '') ?></div>
+                <div class="text-sm"><?= htmlspecialchars($home_content["second_stat{$i}_label"] ?? '') ?></div>
+            </div>
         <?php endfor; ?>
-    </ul>
+    </div>
 
     <?php if(!empty($home_content['second_content'])): ?>
     <p class="content">
@@ -216,6 +210,9 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
         <?php endif; ?>
     </footer>
 </section>
+
+
+
 
             <section id="cta" class="main special wrapper style1 fade-up">
     <div class="inner">

@@ -72,16 +72,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Préparation de la requête SQL
-        $sql = "INSERT INTO projects 
-                (name, description, start_date, end_date, status, image_path, alt_text, project_link) 
+        $sql = "INSERT INTO projects
+                (name, description, start_date, end_date, status, image_path, alt_text, project_link)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        
+
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             throw new Exception("Erreur de préparation de la requête");
         }
 
-        $stmt->bind_param("ssssssss", 
+        $stmt->bind_param("ssssssss",
             $name,
             $description,
             $start_date,
@@ -114,6 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Génération du token CSRF
 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -197,15 +198,11 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                             <p class="text-gray-600 mb-2">
                                 <i class="fas fa-cloud-upload-alt mr-2"></i>Glissez et déposez votre image ici
                             </p>
-                            <p class="text-sm text-gray-400">Formats acceptés : JPG, PNG, WEBP (max 5 Mo)</p>
+                            <p class="text-sm text-gray-400">ou cliquez pour sélectionner</p>
                             <input class="hidden" type="file" id="image" name="image" accept="image/*" required>
-                            <button type="button" id="select-file" 
-                                    class="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                                Sélectionner un fichier
-                            </button>
+                            <img id="preview" src="" alt="Aperçu de l'image"
+                                 class="mt-4 mx-auto hidden max-w-full h-48 object-cover rounded-lg shadow-md">
                         </div>
-                        <img id="preview" src="" alt="Aperçu de l'image" 
-                             class="mt-4 mx-auto hidden max-w-full h-48 object-cover rounded-lg shadow-md">
                     </div>
 
                     <!-- Lien du projet -->
@@ -228,7 +225,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
                     <!-- Bouton de soumission -->
                     <div class="flex justify-end border-t pt-6">
-                        <button type="submit" 
+                        <button type="submit"
                                 class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
                             <i class="fas fa-plus-circle mr-2"></i>Ajouter le projet
                         </button>

@@ -20,6 +20,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $newPhoto = null;
 
+    // Check if email already exists
+    $checkQuery = $conn->prepare("SELECT COUNT(*) FROM adherents WHERE email = ?");
+    $checkQuery->bind_param("s", $email);
+    $checkQuery->execute();
+    $checkQuery->bind_result($emailCount);
+    $checkQuery->fetch();
+    $checkQuery->close();
+
+    if ($emailCount > 0) {
+        die("Erreur : L'adresse email est déjà utilisée.");
+    }
+
     // Gestion de l'upload de photo
     if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['profile_photo'];
@@ -68,6 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

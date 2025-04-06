@@ -85,88 +85,89 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
             <i class="fas fa-tachometer-alt mr-2"></i>Bienvenue, <?php echo $_SESSION['admin']; ?> !
         </h1>
 
-        <!-- Liste des projets -->
-        <section class="mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-purple-800">
-                    <i class="fas fa-project-diagram mr-2"></i>Projets en cours
-                </h2>
-            </div>
+       <!-- Liste des projets -->
+<section class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-purple-800">
+            <i class="fas fa-project-diagram mr-2"></i>Projets en cours
+        </h2>
+    </div>
 
-            <div class="bg-white shadow-xl rounded-lg border border-purple-100">
-                <?php if ($result_projects && $result_projects->num_rows > 0): ?>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                        <?php while($project = $result_projects->fetch_assoc()): ?>
-                            <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
-                                <img src="<?= htmlspecialchars($project['image_path'] ?? '') ?>" 
-                                     alt="<?= htmlspecialchars($project['alt_text'] ?? 'Image du projet') ?>" 
-                                     class="w-full h-48 object-cover">
-                                
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start mb-4">
-                                        <h3 class="text-xl font-semibold text-purple-800">
-                                            <?= htmlspecialchars($project['name'] ?? 'Nom non disponible') ?>
-                                        </h3>
-                                        <span class="px-3 py-1 text-sm rounded-full 
-                                            <?= match($project['status'] ?? '') {
-                                                'planned' => 'bg-purple-100 text-purple-800',
-                                                'in_progress' => 'bg-purple-200 text-purple-900',
-                                                'completed' => 'bg-purple-600 text-white',
-                                                default => 'bg-gray-100 text-gray-800'
-                                            } ?>">
-                                            <?= match($project['status'] ?? '') {
-                                                'planned' => 'Planifié',
-                                                'in_progress' => 'En cours',
-                                                'completed' => 'Terminé',
-                                                default => 'Statut inconnu'
-                                            } ?>
-                                        </span>
-                                    </div>
-
-                                    <?php if(!empty($project['description'])): ?>
-                                    <p class="text-gray-600 mb-4 text-sm">
-                                        <?= htmlspecialchars($project['description']) ?>
-                                    </p>
-                                    <?php endif; ?>
-
-                                    <div class="text-sm text-purple-600 space-y-2 mb-4">
-                                        <?php if(!empty($project['start_date'])): ?>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-calendar-start mr-2"></i>
-                                            <?= date('d/m/Y', strtotime($project['start_date'])) ?>
-                                        </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if(!empty($project['end_date'])): ?>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-calendar-end mr-2"></i>
-                                            <?= date('d/m/Y', strtotime($project['end_date'])) ?>
-                                        </div>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <div class="flex items-center justify-end space-x-3">
-                                        <a href="edit_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
-                                           class="text-purple-600 hover:text-purple-900 text-sm">
-                                            <i class="fas fa-edit mr-1"></i>Modifier
-                                        </a>
-                                        <a href="delete_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
-                                           class="text-red-600 hover:text-red-900 text-sm"
-                                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');">
-                                            <i class="fas fa-trash mr-1"></i>Supprimer
-                                        </a>
-                                    </div>
-                                </div>
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100">
+        <?php if ($result_projects && $result_projects->num_rows > 0): ?>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                <?php while($project = $result_projects->fetch_assoc()): ?>
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                        <img src="<?= htmlspecialchars($project['image_path'] ?? '') ?>" 
+                             alt="<?= htmlspecialchars($project['alt_text'] ?? 'Image du projet') ?>" 
+                             class="w-full h-48 object-cover">
+                        
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-xl font-semibold text-purple-800">
+                                    <?= htmlspecialchars_decode($project['name'] ?? 'Nom non disponible', ENT_QUOTES) ?>
+                                </h3>
+                                <span class="px-3 py-1 text-sm rounded-full 
+                                    <?= match($project['status'] ?? '') {
+                                        'planned' => 'bg-purple-100 text-purple-800',
+                                        'in_progress' => 'bg-purple-200 text-purple-900',
+                                        'completed' => 'bg-purple-600 text-white',
+                                        default => 'bg-gray-100 text-gray-800'
+                                    } ?>">
+                                    <?= match($project['status'] ?? '') {
+                                        'planned' => 'Planifié',
+                                        'in_progress' => 'En cours',
+                                        'completed' => 'Terminé',
+                                        default => 'Statut inconnu'
+                                    } ?>
+                                </span>
                             </div>
-                        <?php endwhile; ?>
+
+                            <?php if(!empty($project['description'])): ?>
+                            <p class="text-gray-600 mb-4 text-sm">
+                                <?= htmlspecialchars_decode($project['description'] ?? '', ENT_QUOTES) ?>
+                            </p>
+                            <?php endif; ?>
+
+                            <div class="text-sm text-purple-600 space-y-2 mb-4">
+                                <?php if(!empty($project['start_date'])): ?>
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-start mr-2"></i>
+                                    <?= date('d/m/Y', strtotime($project['start_date'])) ?>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if(!empty($project['end_date'])): ?>
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-end mr-2"></i>
+                                    <?= date('d/m/Y', strtotime($project['end_date'])) ?>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="flex items-center justify-end space-x-3">
+                                <a href="edit_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
+                                   class="text-purple-600 hover:text-purple-900 text-sm">
+                                    <i class="fas fa-edit mr-1"></i>Modifier
+                                </a>
+                                <a href="delete_project.php?id=<?= (int)($project['id'] ?? 0) ?>" 
+                                   class="text-red-600 hover:text-red-900 text-sm"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');">
+                                    <i class="fas fa-trash mr-1"></i>Supprimer
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                <?php else: ?>
-                    <div class="p-6 text-center bg-purple-50 border-t border-purple-100">
-                        <p class="text-purple-700">Aucun projet n'est actuellement enregistré</p>
-                    </div>
-                <?php endif; ?>
+                <?php endwhile; ?>
             </div>
-        </section>
+        <?php else: ?>
+            <div class="p-6 text-center bg-purple-50 border-t border-purple-100">
+                <p class="text-purple-700">Aucun projet n'est actuellement enregistré</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+
     
 <section>
  <!-- Section Vidéos -->
@@ -193,20 +194,21 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
                         </div>
                         
                         <div class="p-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <h3 class="text-xl font-semibold text-purple-800 truncate">
-                                    <?= htmlspecialchars($video['title']) ?>
-                                </h3>
-                                <span class="text-sm text-purple-600">
-                                    <?= date('d/m/Y', strtotime($video['created_at'])) ?>
-                                </span>
-                            </div>
+    <div class="flex justify-between items-start mb-4">
+        <h3 class="text-xl font-semibold text-purple-800 truncate">
+            <?= htmlspecialchars_decode($video['title'] ?? '', ENT_QUOTES) ?>
+        </h3>
+        <span class="text-sm text-purple-600">
+            <?= date('d/m/Y', strtotime($video['created_at'])) ?>
+        </span>
+    </div>
 
-                            <?php if(!empty($video['description'])): ?>
-                            <p class="text-gray-600 mb-4 text-sm">
-                                <?= htmlspecialchars($video['description']) ?>
-                            </p>
-                            <?php endif; ?>
+                            
+    <?php if(!empty($video['description'])): ?>
+    <p class="text-gray-600 mb-4 text-sm">
+        <?= htmlspecialchars_decode($video['description'] ?? '', ENT_QUOTES) ?>
+    </p>
+    <?php endif; ?>
 
                             <div class="flex items-center justify-end space-x-3">
                                 <a href="edit_video.php?id=<?= $video['id'] ?>" 

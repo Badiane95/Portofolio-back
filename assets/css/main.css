@@ -2216,45 +2216,29 @@ input, select, textarea {
 	}
 
 /* Icon */
+.icon {
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    border-bottom: none;
+    position: relative;
+}
 
-	.icon {
-		text-decoration: none;
-		-moz-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-		-webkit-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-		-ms-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-		transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-		border-bottom: none;
-		position: relative;
-	}
+.icon:before {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900; /* Pour les icônes solides */
+}
 
-		.icon:before {
-			-moz-osx-font-smoothing: grayscale;
-			-webkit-font-smoothing: antialiased;
-			display: inline-block;
-			font-style: normal;
-			font-variant: normal;
-			text-rendering: auto;
-			line-height: 1;
-			text-transform: none !important;
-			font-family: 'Font Awesome 5 Free';
-			font-weight: 400;
-		}
+.icon > .label {
+    display: none;
+}
 
-		.icon > .label {
-			display: none;
-		}
+.icon.solid:before {
+    font-weight: 900;
+}
 
-		.icon:before {
-			line-height: solid;
-		}
-
-		.icon.solid:before {
-			font-weight: 900;
-		}
-
-		.icon.brands:before {
-			font-family: 'Font Awesome 5 Brands';
-		}
+.icon.brands:before {
+    font-family: 'Font Awesome 6 Brands';
+}
 
 		.icon.major {
 			border: solid 1px;
