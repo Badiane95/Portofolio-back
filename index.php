@@ -85,7 +85,7 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
 
            
 
-          <!-- Section Galerie -->
+          <!-- Section Galerie 
 <section id="gallery" class="main special">
     <header class="major">
         <h2><?= htmlspecialchars($home_content['gallery_title'] ?? 'Galerie Photos') ?></h2>
@@ -139,7 +139,7 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
             <?php endif; ?>
         </div>
     </div>
-</section>
+</section> -->
 
           
             <!-- Section Introduction -->
