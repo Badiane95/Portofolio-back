@@ -97,10 +97,10 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                 <?php foreach ($images as $image): ?>
                     <div class="col-4 col-6-medium col-12-small">
                         <article class="box style2">
-                            <!-- Titre de l'image -->
+                           Titre de l'image 
                             <h3 class="title"><?= htmlspecialchars($image['title']) ?></h3>
 
-                            <!-- Image -->
+                          
                             <a href="lib/uploadPhoto/<?= htmlspecialchars($image['filename']) ?>"
                                class="image fit"
                                target="_blank"
@@ -109,7 +109,7 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                                      alt="<?= htmlspecialchars($image['filename']) ?>" />
                             </a>
 
-                            <!-- Détails et actions -->
+                         
                             <div class="inner">
                                 <p class="small">
                                     <strong>Uploadé le :</strong>

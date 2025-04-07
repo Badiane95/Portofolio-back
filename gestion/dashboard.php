@@ -677,7 +677,51 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 </div>
+<!-- Liste des médias sociaux -->
+<section class="mb-8">
+    <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
+        <h2 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
+            Liste des médias sociaux
+        </h2>
 
+        <div class="overflow-x-auto rounded-lg border border-purple-100">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-purple-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">ID</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Nom</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Lien</th>
+                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php while($media = $result_social_media->fetch_assoc()): ?>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-gray-900 font-medium"><?= htmlspecialchars($media['id']) ?></td>
+                        <td class="px-6 py-4 text-gray-900"><?= htmlspecialchars($media['nom']) ?></td>
+                        <td class="px-6 py-4 text-purple-600 hover:text-purple-900">
+                            <a href="<?= htmlspecialchars($media['link']) ?>" target="_blank">
+                                <?= htmlspecialchars($media['link']) ?>
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 space-x-4">
+                            <a href="edit_social_media.php?id=<?= $media['id'] ?>" 
+                               class="text-purple-600 hover:text-purple-900 transition-colors">
+                                Modifier
+                            </a>
+                            <a href="delete_social_media.php?id=<?= $media['id'] ?>" 
+                               class="text-red-600 hover:text-red-900 transition-colors"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce média social ?');">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 <!-- Liste des adhérents -->
 <section class="mb-8">
     <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
@@ -728,51 +772,7 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 </section>
 
-<!-- Liste des médias sociaux -->
-<section class="mb-8">
-    <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
-        <h2 class="text-2xl font-bold text-purple-800 mb-6 border-l-4 border-purple-500 pl-4">
-            Liste des médias sociaux
-        </h2>
 
-        <div class="overflow-x-auto rounded-lg border border-purple-100">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-purple-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">ID</th>
-                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Nom</th>
-                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Lien</th>
-                        <th class="px-6 py-3 text-left text-sm font-medium text-purple-800">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <?php while($media = $result_social_media->fetch_assoc()): ?>
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-gray-900 font-medium"><?= htmlspecialchars($media['id']) ?></td>
-                        <td class="px-6 py-4 text-gray-900"><?= htmlspecialchars($media['nom']) ?></td>
-                        <td class="px-6 py-4 text-purple-600 hover:text-purple-900">
-                            <a href="<?= htmlspecialchars($media['link']) ?>" target="_blank">
-                                <?= htmlspecialchars($media['link']) ?>
-                            </a>
-                        </td>
-                        <td class="px-6 py-4 space-x-4">
-                            <a href="edit_social_media.php?id=<?= $media['id'] ?>" 
-                               class="text-purple-600 hover:text-purple-900 transition-colors">
-                                Modifier
-                            </a>
-                            <a href="delete_social_media.php?id=<?= $media['id'] ?>" 
-                               class="text-red-600 hover:text-red-900 transition-colors"
-                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce média social ?');">
-                                Supprimer
-                            </a>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
 <!-- Liste des images -->
 <section class="mb-8">
     <div class="bg-white shadow-xl rounded-lg border border-purple-100 p-6">
