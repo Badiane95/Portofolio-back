@@ -46,7 +46,7 @@ function validateYoutubeId(string $url): string {
             }
         }
     }
-    
+
     throw new InvalidArgumentException("❌ Format d'URL YouTube invalide");
 }
 
@@ -95,11 +95,11 @@ try {
         $stmt->bind_param("i", $video_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows === 0) {
             throw new RuntimeException("🕵️ Vidéo introuvable - ID potentiellement falsifié");
         }
-        
+
         $video = $result->fetch_assoc();
     }
 
@@ -124,7 +124,7 @@ try {
         }
 
         // 10. Validation des longueurs
-       
+
         if (mb_strlen($title) === 0 || mb_strlen($title) > 500) {
             throw new InvalidArgumentException("📏 Le titre doit contenir entre 1 et 500 caractères");
         }
@@ -136,15 +136,15 @@ try {
         $video_url = validateYoutubeId($raw_url);
 
         // 12. Mise à jour sécurisée
-        $stmt = $conn->prepare("UPDATE videos SET 
-            title = ?, 
-            description = ?, 
-            video_url = ?, 
-            updated_at = NOW() 
+        $stmt = $conn->prepare("UPDATE videos SET
+            title = ?,
+            description = ?,
+            video_url = ?,
+            updated_at = NOW()
             WHERE id = ?");
 
         $stmt->bind_param("sssi", $title, $description, $video_url, $video_id);
-        
+
         if (!$stmt->execute()) {
             throw new mysqli_sql_exception("💾 Erreur base de données : " . $stmt->error);
         }
@@ -184,6 +184,7 @@ try {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
