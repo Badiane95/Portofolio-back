@@ -358,49 +358,112 @@ $skills = $result->fetch_all(MYSQLI_ASSOC);
                             </div>
                         </div>
 
-                        <!-- Première Section -->
-                        <div class="space-y-4 p-4 bg-purple-50 rounded-lg">
-                            <h3 class="text-lg font-semibold text-purple-600">Première Section</h3>
-                            <div>
-                                <label class="block text-sm font-medium text-purple-700 mb-1">Titre principal</label>
-                                <input type="text" name="first_title" id="first_title" 
-                                       class="w-full p-2 border border-purple-200 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_title'] ?? '') ?>">
-                            </div>
+                      <!-- Première Section avec gestion d'icônes -->
+<div class="space-y-4 p-4 bg-purple-50 rounded-lg">
+    <h3 class="text-lg font-semibold text-purple-600">Configuration de la Section Compétences</h3>
+    
+    <!-- Prévisualisation dynamique -->
+    <div class="mb-6 p-4 border border-purple-200 rounded-lg bg-white">
+        <h4 class="text-md font-semibold text-purple-600 mb-4">Aperçu en temps réel</h4>
+        <section class="main special">
+            <header class="major">
+                <h2 class="text-2xl font-bold"><?= htmlspecialchars($home_data['first_title'] ?? 'Titre par défaut') ?></h2>
+                <?php if(!empty($home_data['first_text'])): ?>
+                    <p class="mt-2 text-gray-600"><?= htmlspecialchars($home_data['first_text']) ?></p>
+                <?php endif; ?>
+            </header>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <?php for($i = 1; $i <= 3; $i++): ?>
+                    <div class="text-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                        <i class="<?= htmlspecialchars($home_data["first_item{$i}_icon"] ?? 'fa-solid fa-star') ?> text-4xl text-purple-600 mb-3"></i>
+                        <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?></h3>
+                        <p class="text-gray-600 text-sm"><?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?></p>
+                    </div>
+                <?php endfor; ?>
+            </div>
 
-                            <!-- Item 1 -->
-                            <div class="space-y-2 pl-4 border-l-2 border-purple-200">
-                                <label class="block text-sm font-medium text-purple-700">Élément 1</label>
-                                <input type="text" name="first_item1_title" placeholder="Titre" 
-                                       class="w-full p-2 border border-purple-100 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_item1_title'] ?? '') ?>">
-                                <input type="text" name="first_item1_text" placeholder="Texte" 
-                                       class="w-full p-2 border border-purple-100 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_item1_text'] ?? '') ?>">
-                            </div>
+            <?php if(!empty($home_data['first_button_text'])): ?>
+                <div class="mt-8 text-center">
+                    <a href="<?= htmlspecialchars($home_data['first_button_link'] ?? '#') ?>" 
+                       class="inline-block px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        <?= htmlspecialchars($home_data['first_button_text']) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </section>
+    </div>
 
-                            <!-- Item 2 -->
-                            <div class="space-y-2 pl-4 border-l-2 border-purple-200">
-                                <label class="block text-sm font-medium text-purple-700">Élément 2</label>
-                                <input type="text" name="first_item2_title" placeholder="Titre" 
-                                       class="w-full p-2 border border-purple-100 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_item2_title'] ?? '') ?>">
-                                <input type="text" name="first_item2_text" placeholder="Texte" 
-                                       class="w-full p-2 border border-purple-100 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_item2_text'] ?? '') ?>">
-                            </div>
+    <!-- Formulaire d'édition -->
+    <div class="space-y-6">
+        <!-- Titre principal + Texte d'introduction -->
+        <div class="grid grid-cols-1 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-purple-700 mb-1">Titre principal</label>
+                <input type="text" name="first_title" 
+                       class="w-full p-2 border border-purple-200 rounded-md"
+                       value="<?= htmlspecialchars($home_data['first_title'] ?? '') ?>">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-purple-700 mb-1">Texte d'introduction</label>
+                <textarea name="first_text" rows="2" 
+                          class="w-full p-2 border border-purple-200 rounded-md"><?= htmlspecialchars($home_data['first_text'] ?? '') ?></textarea>
+            </div>
+        </div>
 
-                            <!-- Item 3 -->
-                            <div class="space-y-2 pl-4 border-l-2 border-purple-200">
-                                <label class="block text-sm font-medium text-purple-700">Élément 3</label>
-                                <input type="text" name="first_item3_title" placeholder="Titre" 
-                                       class="w-full p-2 border border-purple-100 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_item3_title'] ?? '') ?>">
-                                <input type="text" name="first_item3_text" placeholder="Texte" 
-                                       class="w-full p-2 border border-purple-100 rounded-md"
-                                       value="<?= htmlspecialchars($home_data['first_item3_text'] ?? '') ?>">
-                            </div>
-                        </div>
+        <!-- Éléments avec icônes -->
+        <?php for($i = 1; $i <= 3; $i++): ?>
+            <div class="space-y-4 p-4 bg-white rounded-lg shadow-sm border border-purple-100">
+                <h4 class="font-medium text-purple-600">Élément <?= $i ?></h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm text-purple-700 mb-1">Icône Font Awesome</label>
+                        <input type="text" 
+                               name="first_item<?= $i ?>_icon" 
+                               class="w-full p-2 border border-purple-200 rounded-md"
+                               placeholder="fa-solid fa-star"
+                               value="<?= htmlspecialchars($home_data["first_item{$i}_icon"] ?? '') ?>">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-purple-700 mb-1">Titre</label>
+                        <input type="text" 
+                               name="first_item<?= $i ?>_title" 
+                               class="w-full p-2 border border-purple-200 rounded-md"
+                               value="<?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?>">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-purple-700 mb-1">Texte descriptif</label>
+                        <input type="text" 
+                               name="first_item<?= $i ?>_text" 
+                               class="w-full p-2 border border-purple-200 rounded-md"
+                               value="<?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?>">
+                    </div>
+                </div>
+            </div>
+        <?php endfor; ?>
+
+        <!-- Bouton d'action -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white rounded-lg border border-purple-100">
+            <div>
+                <label class="block text-sm font-medium text-purple-700 mb-1">Texte du bouton</label>
+                <input type="text" name="first_button_text" 
+                       class="w-full p-2 border border-purple-200 rounded-md"
+                       value="<?= htmlspecialchars($home_data['first_button_text'] ?? '') ?>">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-purple-700 mb-1">Lien du bouton</label>
+                <input type="url" name="first_button_link" 
+                       class="w-full p-2 border border-purple-200 rounded-md"
+                       value="<?= htmlspecialchars($home_data['first_button_link'] ?? '') ?>">
+            </div>
+        </div>
+    </div>
+</div>
 
                         <!-- Section À propos -->
                         <div class="space-y-4 p-4 bg-purple-50 rounded-lg">

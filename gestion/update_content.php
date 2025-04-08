@@ -32,6 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'projects_title', 'gallery_title'          // Projets et galerie
         ];
 
+        // Champs supplémentaires à mettre à jour (nouveaux champs d'icônes)
+        $fields = [
+            'first_title',
+            'first_item1_icon', 'first_item1_title', 'first_item1_text',
+            'first_item2_icon', 'first_item2_title', 'first_item2_text',
+            'first_item3_icon', 'first_item3_title', 'first_item3_text'
+        ];
+
+        // Fusion des deux tableaux pour une gestion unique dans la boucle
+        $sections = array_merge($sections, $fields);
+
         // Ajout dynamique des champs statistiques (5 éléments)
         for ($i = 1; $i <= 5; $i++) {
             array_push($sections, 

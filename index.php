@@ -157,34 +157,44 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                 </div>
             </section>
 
-            <!-- Section Compétences -->
-            <section id="first" class="main special">
-                <header class="major">
-                    <h2><?= htmlspecialchars($home_content['first_title'] ?? 'Magna veroeros') ?></h2>
-                </header>
-                <ul class="features">
-                    <li>
-                        <span class="icon solid major style1 fa-code"></span>
-                        <h3><?= htmlspecialchars($home_content['first_item1_title'] ?? 'Ipsum consequat') ?></h3>
-                        <p><?= htmlspecialchars($home_content['first_item1_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
-                    </li>
-                    <li>
-                        <span class="icon major style3 fa-copy"></span>
-                        <h3><?= htmlspecialchars($home_content['first_item2_title'] ?? 'Amed sed feugiat') ?></h3>
-                        <p><?= htmlspecialchars($home_content['first_item2_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
-                    </li>
-                    <li>
-                        <span class="icon major style5 fa-gem"></span>
-                        <h3><?= htmlspecialchars($home_content['first_item3_title'] ?? 'Dolor nullam') ?></h3>
-                        <p><?= htmlspecialchars($home_content['first_item3_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
-                    </li>
-                </ul>
-                <footer class="major">
-                    <ul class="actions special">
-                        <li><a href="elements.php" class="button">Voir plus</a></li>
-                    </ul>
-                </footer>
-            </section>
+   <!-- Section Compétences -->
+<section id="first" class="main special">
+    <header class="major">
+        <h2><?= htmlspecialchars($home_content['first_title'] ?? 'Magna veroeros') ?></h2>
+        <?php if(!empty($home_content['first_text'])): ?>
+            <p><?= htmlspecialchars($home_content['first_text']) ?></p>
+        <?php endif; ?>
+    </header>
+    
+    <ul class="features">
+        <?php for($i = 1; $i <= 3; $i++): ?>
+            <li>
+                <span class="icon solid major style<?= $i ?> <?= htmlspecialchars($home_content["first_item{$i}_icon"] ?? 'fa-code') ?>"></span>
+                <h3><?= htmlspecialchars($home_content["first_item{$i}_title"] ?? 'Titre par défaut') ?></h3>
+                <p><?= htmlspecialchars($home_content["first_item{$i}_text"] ?? 'Texte descriptif par défaut') ?></p>
+            </li>
+        <?php endfor; ?>
+    </ul>
+
+    <?php if(!empty($home_content['first_content'])): ?>
+        <div class="content">
+            <?= htmlspecialchars($home_content['first_content']) ?>
+        </div>
+    <?php endif; ?>
+
+    <footer class="major">
+        <?php if(!empty($home_content['first_button_text']) && !empty($home_content['first_button_link'])): ?>
+            <ul class="actions special">
+                <li>
+                    <a href="<?= htmlspecialchars($home_content['first_button_link']) ?>" class="button">
+                        <?= htmlspecialchars($home_content['first_button_text']) ?>
+                    </a>
+                </li>
+            </ul>
+        <?php endif; ?>
+    </footer>
+</section>
+
 
 <!-- Section Statistiques -->
 <section id="second" class="main special">
@@ -193,10 +203,10 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
         <p><?= htmlspecialchars($home_content['second_text'] ?? 'Donec imperdiet consequat consequat. Suspendisse feugiat congue...') ?></p>
     </header>
 
-    <div class="flex flex-wrap justify-center gap-4 mx-auto max-w-6xl px-4 sm:px-6">
+    <div class="flex flex-wrap justify-center gap-6 mx-auto max-w-6xl px-4 sm:px-6">
         <?php for($i = 1; $i <= 5; $i++): ?>
-            <div class="text-center p-3 bg-white rounded-lg shadow w-full sm:w-auto sm:min-w-[150px] md:min-w-[180px]">
-                <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-code-branch') ?> text-3xl text-purple-600 mb-4"></i>
+            <div class="text-center p-4 bg-white rounded-lg shadow-lg border border-gray-300 w-full sm:w-auto sm:min-w-[150px] md:min-w-[180px]">
+                <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-code-branch') ?> text-4xl text-purple-600 mb-6"></i>
                 <div class="font-bold text-xl mb-2"><?= htmlspecialchars($home_content["second_stat{$i}_number"] ?? '') ?></div>
                 <div class="text-sm"><?= htmlspecialchars($home_content["second_stat{$i}_label"] ?? '') ?></div>
             </div>
@@ -204,16 +214,16 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
     </div>
 
     <?php if(!empty($home_content['second_content'])): ?>
-    <p class="content">
+    <p class="content mt-6">
         <?= htmlspecialchars($home_content['second_content']) ?>
     </p>
     <?php endif; ?>
 
-    <footer class="major">
+    <footer class="major mt-8">
         <?php if(!empty($home_content['second_button_text']) && !empty($home_content['second_button_link'])): ?>
         <ul class="actions special">
             <li>
-                <a href="<?= htmlspecialchars($home_content['second_button_link']) ?>" class="button">
+                <a href="<?= htmlspecialchars($home_content['second_button_link']) ?>" class="button bg-purple-600 text-white hover:bg-purple-700">
                     <?= htmlspecialchars($home_content['second_button_text']) ?>
                 </a>
             </li>
@@ -411,6 +421,131 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
 });
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Ajoutez cela avant la fermeture de votre balise </body> -->
+<div id="icon-picker-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-10/12 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-purple-700">Sélectionner une icône</h3>
+            <button type="button" class="close-modal text-gray-500 hover:text-gray-800">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        
+        <input type="text" id="icon-search" class="w-full p-2 border border-purple-200 rounded-md mb-4" placeholder="Rechercher une icône...">
+        
+        <div class="grid grid-cols-6 gap-4" id="icon-grid">
+            <!-- Les icônes seront générées ici par JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Liste des icônes Font Awesome populaires
+const popularIcons = [
+    'fa-solid fa-star', 'fa-solid fa-heart', 'fa-solid fa-user', 
+    'fa-solid fa-home', 'fa-solid fa-envelope', 'fa-solid fa-phone',
+    'fa-solid fa-camera', 'fa-solid fa-image', 'fa-solid fa-video',
+    'fa-solid fa-music', 'fa-solid fa-headphones', 'fa-solid fa-play',
+    'fa-solid fa-pause', 'fa-solid fa-stop', 'fa-solid fa-forward',
+    'fa-solid fa-backward', 'fa-solid fa-fast-forward', 'fa-solid fa-fast-backward',
+    'fa-solid fa-search', 'fa-solid fa-cog', 'fa-solid fa-gear',
+    'fa-solid fa-wrench', 'fa-solid fa-pencil', 'fa-solid fa-pen',
+    'fa-solid fa-edit', 'fa-solid fa-trash', 'fa-solid fa-delete',
+    'fa-solid fa-plus', 'fa-solid fa-minus', 'fa-solid fa-times',
+    'fa-solid fa-check', 'fa-solid fa-info', 'fa-solid fa-question',
+    'fa-solid fa-exclamation', 'fa-solid fa-warning', 'fa-solid fa-triangle-exclamation',
+    'fa-solid fa-circle-info', 'fa-solid fa-circle-question', 'fa-solid fa-circle-exclamation',
+    'fa-solid fa-circle-check', 'fa-solid fa-circle-xmark', 'fa-solid fa-circle-plus',
+    'fa-solid fa-circle-minus', 'fa-solid fa-arrow-up', 'fa-solid fa-arrow-down',
+    'fa-solid fa-arrow-left', 'fa-solid fa-arrow-right', 'fa-solid fa-code',
+    'fa-solid fa-terminal', 'fa-solid fa-laptop', 'fa-solid fa-desktop',
+    'fa-solid fa-mobile', 'fa-solid fa-tablet', 'fa-solid fa-server',
+    'fa-solid fa-database', 'fa-solid fa-cloud', 'fa-solid fa-upload',
+    'fa-solid fa-download', 'fa-solid fa-wifi', 'fa-solid fa-signal',
+    'fa-solid fa-bluetooth', 'fa-solid fa-lightbulb', 'fa-solid fa-sun',
+    'fa-solid fa-moon', 'fa-solid fa-calendar', 'fa-solid fa-clock',
+    'fa-solid fa-bell', 'fa-solid fa-flag', 'fa-solid fa-bookmark',
+    'fa-solid fa-tag', 'fa-solid fa-tags', 'fa-solid fa-folder'
+];
+
+let currentInput = null;
+const iconGrid = document.getElementById('icon-grid');
+const iconSearch = document.getElementById('icon-search');
+const modal = document.getElementById('icon-picker-modal');
+
+// Générer la grille d'icônes
+function generateIconGrid(icons) {
+    iconGrid.innerHTML = '';
+    icons.forEach(icon => {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'text-center p-3 border rounded-lg cursor-pointer hover:bg-purple-100';
+        iconDiv.innerHTML = `<i class="${icon} text-2xl text-purple-600"></i><div class="text-xs mt-1 text-gray-600">${icon.split(' ').pop()}</div>`;
+        iconDiv.dataset.icon = icon;
+        iconDiv.addEventListener('click', () => {
+            if (currentInput) {
+                currentInput.value = icon;
+                // Mettre à jour l'aperçu si nécessaire
+                const previewSection = currentInput.closest('.space-y-4').querySelector('.mb-6');
+                if (previewSection) {
+                    const index = currentInput.name.match(/first_item(\d+)_icon/)[1];
+                    const iconElement = previewSection.querySelector(`.grid > div:nth-child(${index}) > i`);
+                    if (iconElement) {
+                        iconElement.className = icon + ' text-3xl text-purple-600 mb-2';
+                    }
+                }
+            }
+            modal.classList.add('hidden');
+        });
+        iconGrid.appendChild(iconDiv);
+    });
+}
+
+// Initialiser le sélecteur d'icônes
+document.querySelectorAll('input[name$="_icon"]').forEach(input => {
+    const pickButton = document.createElement('button');
+    pickButton.type = 'button';
+    pickButton.className = 'bg-purple-100 p-2 rounded-r-md hover:bg-purple-200';
+    pickButton.innerHTML = '<i class="fa-solid fa-search"></i>';
+    pickButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentInput = input;
+        generateIconGrid(popularIcons);
+        modal.classList.remove('hidden');
+    });
+    
+    // Wrapper pour l'input et le bouton
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+    wrapper.appendChild(pickButton);
+    
+    // Ajuster le style de l'input
+    input.classList.add('rounded-l-md', 'rounded-r-none');
+});
+
+// Filtrer les icônes lors de la recherche
+iconSearch.addEventListener('input', () => {
+    const searchTerm = iconSearch.value.toLowerCase();
+    const filteredIcons = popularIcons.filter(icon => 
+        icon.toLowerCase().includes(searchTerm)
+    );
+    generateIconGrid(filteredIcons);
+});
+
+// Fermer le modal
+document.querySelector('.close-modal').addEventListener('click', () => {
+    modal.classList.add('hidden');
+});
+
+// Fermer le modal en cliquant à l'extérieur
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.classList.add('hidden');
+    }
+});
+</script>
+
 </body>
 
         <!-- Footer -->
