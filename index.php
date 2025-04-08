@@ -157,43 +157,44 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                 </div>
             </section>
 
-   <!-- Section Compétences -->
+ <!-- Section Compétences -->
 <section id="first" class="main special">
     <header class="major">
-        <h2><?= htmlspecialchars($home_content['first_title'] ?? 'Magna veroeros') ?></h2>
-        <?php if(!empty($home_content['first_text'])): ?>
-            <p><?= htmlspecialchars($home_content['first_text']) ?></p>
+        <h2><?= htmlspecialchars($home_data['first_title'] ?? 'Magna veroeros') ?></h2>
+        <?php if(!empty($home_data['first_text'])): ?>
+            <p><?= htmlspecialchars($home_data['first_text']) ?></p>
         <?php endif; ?>
     </header>
     
     <ul class="features">
         <?php for($i = 1; $i <= 3; $i++): ?>
             <li>
-                <span class="icon solid major style<?= $i ?> <?= htmlspecialchars($home_content["first_item{$i}_icon"] ?? 'fa-code') ?>"></span>
-                <h3><?= htmlspecialchars($home_content["first_item{$i}_title"] ?? 'Titre par défaut') ?></h3>
-                <p><?= htmlspecialchars($home_content["first_item{$i}_text"] ?? 'Texte descriptif par défaut') ?></p>
+                <span class="icon solid major style<?= $i ?> <?= htmlspecialchars($home_data["first_item{$i}_icon"] ?? 'fa-code') ?>"></span>
+                <h3><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? 'Titre par défaut') ?></h3>
+                <p><?= htmlspecialchars($home_data["first_item{$i}_text"] ?? 'Texte descriptif par défaut') ?></p>
             </li>
         <?php endfor; ?>
     </ul>
 
-    <?php if(!empty($home_content['first_content'])): ?>
+    <?php if(!empty($home_data['first_content'])): ?>
         <div class="content">
-            <?= htmlspecialchars($home_content['first_content']) ?>
+            <?= htmlspecialchars($home_data['first_content']) ?>
         </div>
     <?php endif; ?>
 
     <footer class="major">
-        <?php if(!empty($home_content['first_button_text']) && !empty($home_content['first_button_link'])): ?>
+        <?php if(!empty($home_data['first_button_text']) && !empty($home_data['first_button_link'])): ?>
             <ul class="actions special">
                 <li>
-                    <a href="<?= htmlspecialchars($home_content['first_button_link']) ?>" class="button">
-                        <?= htmlspecialchars($home_content['first_button_text']) ?>
+                    <a href="<?= htmlspecialchars($home_data['first_button_link']) ?>" class="button">
+                        <?= htmlspecialchars($home_data['first_button_text']) ?>
                     </a>
                 </li>
             </ul>
         <?php endif; ?>
     </footer>
 </section>
+
 
 
 <!-- Section Statistiques -->
