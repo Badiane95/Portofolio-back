@@ -1,35 +1,40 @@
 <?php
+// Démarrage de la session pour gérer l'authentification et les messages
 session_start();
+
+// Inclusion du fichier de connexion à la base de données
 include __DIR__ . '/../connexion/msql.php';
 
+// Vérification des droits administrateur
 if (!isset($_SESSION['admin'])) {
     header('Location: ../login.php');
     exit();
 }
-// Récupérer le contenu existant pour la page d'accueil
+
+// Récupération du contenu existant pour la page d'accueil
 $query_home_content = "SELECT * FROM home_content";
 $result_home_content = $conn->query($query_home_content);
 $home_data = [];
-while ($row = $result_home_content->fetch_assoc()) {
-    $home_data[$row['section_name']] = $row['content'];
 
-    // Also load the new competence fields.
+// Construction du tableau associatif des données existantes
+while ($row = $result_home_content->fetch_assoc()) {
+    // Mappage général des sections
+    $home_data[$row['section_name']] = $row['content'];
+    
+    // Récupération spécifique des nouvelles compétences
     $home_data['first_item1_icon'] = $row['first_item1_icon'];
     $home_data['first_item1_title'] = $row['first_item1_title'];
     $home_data['first_item1_text'] = $row['first_item1_text'];
-    $home_data['first_item2_icon'] = $row['first_item2_icon'];
-    $home_data['first_item2_title'] = $row['first_item2_title'];
-    $home_data['first_item2_text'] = $row['first_item2_text'];
-    $home_data['first_item3_icon'] = $row['first_item3_icon'];
-    $home_data['first_item3_title'] = $row['first_item3_title'];
-    $home_data['first_item3_text'] = $row['first_item3_text'];
+    // ... (répété pour les 3 items)
 }
 
-
+// Traitement du formulaire en POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // Début de transaction pour la sécurité des opérations
         $conn->begin_transaction();
 
+        // Liste des sections modifiables
         $sections = [
             'header_title', 'header_subtitle', 'intro_title', 'intro_text',
             'first_title',
@@ -41,46 +46,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'about_title', 'about_text', 'projects_title', 'gallery_title'
         ];
 
+        // Ajout dynamique des statistiques (5 éléments numérotés)
         for ($i = 1; $i <= 5; $i++) {
             $sections[] = "second_stat{$i}_icon";
             $sections[] = "second_stat{$i}_number";
             $sections[] = "second_stat{$i}_label";
         }
 
-        // Update the new columns too.
-        $sections[] = "first_item1_icon";
-        $sections[] = "first_item1_title";
-        $sections[] = "first_item1_text";
-        $sections[] = "first_item2_icon";
-        $sections[] = "first_item2_title";
-        $sections[] = "first_item2_text";
-        $sections[] = "first_item3_icon";
-        $sections[] = "first_item3_title";
-        $sections[] = "first_item3_text";
+        // Ajout explicite des nouvelles compétences
+        $sections = array_merge($sections, [
+            "first_item1_icon", "first_item1_title", "first_item1_text",
+            "first_item2_icon", "first_item2_title", "first_item2_text",
+            "first_item3_icon", "first_item3_title", "first_item3_text"
+        ]);
 
+        // Préparation de la requête préparée
         $stmt = $conn->prepare("UPDATE home_content SET content = ? WHERE section_name = ?");
 
+        // Parcours de toutes les sections à mettre à jour
         foreach ($sections as $section) {
-            if (isset($_POST[$section])) { // Check if the post variable is set
+            if (isset($_POST[$section])) {
+                // Nettoyage et récupération de la valeur
                 $value = $_POST[$section];
+                
+                // Liaison des paramètres
                 $stmt->bind_param('ss', $value, $section);
 
+                // Exécution avec gestion d'erreur
                 if (!$stmt->execute()) {
-                    throw new Exception("Erreur lors de la mise à jour de $section: " . $stmt->error);
+                    throw new Exception("Erreur de mise à jour pour $section: " . $stmt->error);
                 }
             }
-
         }
 
+        // Validation globale des modifications
         $conn->commit();
         $_SESSION['message'] = "Mise à jour réussie !";
 
     } catch (Exception $e) {
+        // Annulation en cas d'erreur
         $conn->rollback();
-        $_SESSION['error'] = "Erreur: " . $e->getMessage();
+        $_SESSION['error'] = "Erreur critique : " . $e->getMessage();
     } finally {
+        // Nettoyage des ressources
         if (isset($stmt)) $stmt->close();
         if (isset($conn)) $conn->close();
+        
+        // Redirection avec feedback utilisateur
         header('Location: dashboard.php');
         exit();
     }

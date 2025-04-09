@@ -1,43 +1,53 @@
 <?php
+// Démarrage de la session pour gérer l'authentification
 session_start();
+
+// Inclusion du fichier de connexion à la base de données
 include __DIR__ . '/../connexion/msql.php';
 
+// Vérification des droits administrateur
 if (!isset($_SESSION['admin'])) {
     header("Location: ../login/session.php");
     exit;
 }
 
+// Configuration du répertoire d'upload
 $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/BUT2/S4/Portofolio-Back/lib/uploadPhoto/';
 
+// Création du répertoire s'il n'existe pas
 if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+    mkdir($uploadDir, 0755, true); // Crée récursivement avec permissions 755
 }
 
+// Traitement du formulaire en POST
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['image'])) {
+    // Récupération des données du formulaire
     $title = $_POST['title'] ?? '';
     $alt = $_POST['alt'] ?? '';
 
+    // Types de fichiers autorisés
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 
-    // Récupère les informations sur le fichier uploadé
+    // Récupération des informations du fichier
     $fileName = $_FILES['image']['name'];
     $fileTmpName = $_FILES['image']['tmp_name'];
     $fileSize = $_FILES['image']['size'];
     $fileError = $_FILES['image']['error'];
 
-    // Vérifie si un fichier a été uploadé
+    // Vérification de la présence d'un fichier
     if (!empty($fileName)) {
         $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
+        // Validation du type de fichier et absence d'erreur
         if (in_array($fileExt, $allowedExtensions) && $fileError === 0) {
-            // Génère un nom de fichier unique
+            // Génération d'un nom de fichier unique
             $newFileName = uniqid('', true) . "." . $fileExt;
             $fileDestination = $uploadDir . $newFileName;
             $relativePath = '/BUT2/S4/Portofolio-Back/lib/uploadPhoto/' . $newFileName;
 
-            // Déplace le fichier uploadé vers sa destination finale
+            // Déplacement du fichier uploadé
             if (move_uploaded_file($fileTmpName, $fileDestination)) {
-                // Prépare la requête SQL pour insérer les informations de l'image dans la base de données
+                // Insertion en base de données
                 $stmt = $conn->prepare("INSERT INTO images (filename, filepath, title) VALUES (?, ?, ?)");
                 $stmt->bind_param("sss", $newFileName, $relativePath, $title);
 
@@ -58,6 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['image'])) {
     }
 }
 
+// Récupération de la dernière image ajoutée
 $lastImageQuery = "SELECT * FROM images ORDER BY id DESC LIMIT 1";
 $lastImageResult = $conn->query($lastImageQuery);
 $lastImage = $lastImageResult->fetch_assoc();
@@ -83,7 +94,7 @@ $lastImage = $lastImageResult->fetch_assoc();
                 </h1>
 
                 <form action="" method="post" enctype="multipart/form-data" class="space-y-6">
-                    <!-- Titre -->
+                    <!-- Champ Titre -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Titre *</label>
                         <input type="text" name="title" required
@@ -91,7 +102,7 @@ $lastImage = $lastImageResult->fetch_assoc();
                                placeholder="Titre descriptif">
                     </div>
 
-                    <!-- Zone de dépôt -->
+                    <!-- Zone de dépôt drag & drop -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Image *</label>
                         <div id="drop-zone" 
@@ -107,7 +118,7 @@ $lastImage = $lastImageResult->fetch_assoc();
                         </div>
                     </div>
 
-                    <!-- Texte alternatif -->
+                    <!-- Champ Description alternative -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Description alternative *</label>
                         <input type="text" name="alt" required
@@ -126,6 +137,7 @@ $lastImage = $lastImageResult->fetch_assoc();
             </div>
         </div>
 
+        <!-- Affichage de la dernière image ajoutée -->
         <?php if ($lastImage): ?>
         <div class="mt-8 bg-white shadow-xl rounded-lg border border-purple-100 overflow-hidden">
             <div class="p-6">

@@ -184,23 +184,7 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
             </div>
             <?php endfor; ?>
         </div>
-        <ul class="features">
-                    <li>
-                        <span class="icon solid major style1 fa-code"></span>
-                        <h3><?= htmlspecialchars($home_content['first_item1_title'] ?? 'Ipsum consequat') ?></h3>
-                        <p><?= htmlspecialchars($home_content['first_item1_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
-                    </li>
-                    <li>
-                        <span class="icon major style3 fa-copy"></span>
-                        <h3><?= htmlspecialchars($home_content['first_item2_title'] ?? 'Amed sed feugiat') ?></h3>
-                        <p><?= htmlspecialchars($home_content['first_item2_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
-                    </li>
-                    <li>
-                        <span class="icon major style5 fa-gem"></span>
-                        <h3><?= htmlspecialchars($home_content['first_item3_title'] ?? 'Dolor nullam') ?></h3>
-                        <p><?= htmlspecialchars($home_content['first_item3_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
-                    </li>
-                </ul>
+        
 
         <?php if(!empty($home_content['first_button_text']) && !empty($home_content['first_button_link'])): ?>
         <footer class="mt-12 text-center">
