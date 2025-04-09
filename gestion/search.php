@@ -1,5 +1,10 @@
 <?php
+session_start();
 
+if (!isset($_SESSION['admin'])) {
+    header("Location: ../login/session.php");
+    exit;
+}
 // Gestionnaire de messages
 if (isset($_SESSION['message'])) {
     echo "<div class='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4' role='alert'>
