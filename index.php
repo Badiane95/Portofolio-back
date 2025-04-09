@@ -161,9 +161,7 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
 <section class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
         <header class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-purple-800 mb-4">
-                <?= htmlspecialchars($home_content['first_title'] ?? 'Mes Compétences') ?>
-            </h2>
+            <h2><?= htmlspecialchars($home_content['first_title'] ?? 'Magna veroeros') ?></h2>            </h2>
             <?php if(!empty($home_content['first_subtitle'])): ?>
             <p class="text-gray-600 max-w-2xl mx-auto">
                 <?= htmlspecialchars($home_content['first_subtitle']) ?>
@@ -186,6 +184,23 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
             </div>
             <?php endfor; ?>
         </div>
+        <ul class="features">
+                    <li>
+                        <span class="icon solid major style1 fa-code"></span>
+                        <h3><?= htmlspecialchars($home_content['first_item1_title'] ?? 'Ipsum consequat') ?></h3>
+                        <p><?= htmlspecialchars($home_content['first_item1_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
+                    </li>
+                    <li>
+                        <span class="icon major style3 fa-copy"></span>
+                        <h3><?= htmlspecialchars($home_content['first_item2_title'] ?? 'Amed sed feugiat') ?></h3>
+                        <p><?= htmlspecialchars($home_content['first_item2_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
+                    </li>
+                    <li>
+                        <span class="icon major style5 fa-gem"></span>
+                        <h3><?= htmlspecialchars($home_content['first_item3_title'] ?? 'Dolor nullam') ?></h3>
+                        <p><?= htmlspecialchars($home_content['first_item3_text'] ?? 'Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.') ?></p>
+                    </li>
+                </ul>
 
         <?php if(!empty($home_content['first_button_text']) && !empty($home_content['first_button_link'])): ?>
         <footer class="mt-12 text-center">
