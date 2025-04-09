@@ -72,6 +72,7 @@
                             <i class="fas fa-tools"></i>
                             Compétences
                         </a>
+                        
                     </div>
                 </div>
                 <div class="ml-8">

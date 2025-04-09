@@ -19,18 +19,8 @@ if (isset($_SESSION['error'])) {
 include __DIR__ . '/../connexion/msql.php';
 
 // Récupérer la liste des projets
-$query_projects = "SELECT 
-    id, 
-    name, 
-    description, 
-    start_date, 
-    end_date, 
-    status, 
-    image_path, 
-    alt_text, 
-    created_at 
-    FROM projects 
-    ORDER BY created_at DESC";
+
+$query_projects = "SELECT * FROM projects";
 $result_projects = $conn->query($query_projects);
 
 // Récupérer la liste des adhérents
@@ -77,6 +67,7 @@ if (isset($_GET['delete'])) {
 // Récupération des compétences
 $result = $conn->query("SELECT * FROM skills ORDER BY created_at DESC");
 $skills = $result->fetch_all(MYSQLI_ASSOC);
+
 ?>
 
 <!DOCTYPE html>

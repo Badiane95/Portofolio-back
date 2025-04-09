@@ -42,9 +42,21 @@ switch ($category) {
     case 'skills':
         $table = 'skills';
         break;
+    case 'videos':
+            $table = 'videos';
+            break;
+    case 'cv':
+            $table = 'cv';
+            break;
+    case 'form_fields':
+            $table = 'contact_form';
+            break;
+    case 'social_media':
+            $table = 'social_media';
+            break;
+        
     default:
-        echo json_encode(['error' => 'Catégorie invalide']);
-        exit;
+        return null;
 }
 
 // Préparation de la requête SQL avec une requête préparée pour la sécurité
