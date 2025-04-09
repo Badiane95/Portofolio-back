@@ -1,87 +1,86 @@
 <?php
-// Démarrage de la session pour gérer les messages utilisateur
 session_start();
-
-// Inclusion du fichier de connexion à la base de données
 include __DIR__ . '/../connexion/msql.php';
 
-// Vérification des droits d'accès admin
 if (!isset($_SESSION['admin'])) {
-    $_SESSION['error'] = "Accès non autorisé";
     header('Location: ../login.php');
     exit();
 }
+// Récupérer le contenu existant pour la page d'accueil
+$query_home_content = "SELECT * FROM home_content";
+$result_home_content = $conn->query($query_home_content);
+$home_data = [];
+while ($row = $result_home_content->fetch_assoc()) {
+    $home_data[$row['section_name']] = $row['content'];
 
-// Traitement uniquement pour les requêtes POST
+    // Also load the new competence fields.
+    $home_data['first_item1_icon'] = $row['first_item1_icon'];
+    $home_data['first_item1_title'] = $row['first_item1_title'];
+    $home_data['first_item1_text'] = $row['first_item1_text'];
+    $home_data['first_item2_icon'] = $row['first_item2_icon'];
+    $home_data['first_item2_title'] = $row['first_item2_title'];
+    $home_data['first_item2_text'] = $row['first_item2_text'];
+    $home_data['first_item3_icon'] = $row['first_item3_icon'];
+    $home_data['first_item3_title'] = $row['first_item3_title'];
+    $home_data['first_item3_text'] = $row['first_item3_text'];
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Début de transaction pour atomicité des opérations
         $conn->begin_transaction();
 
-        // Configuration des sections principales du formulaire
         $sections = [
-            'header_title', 'header_subtitle',         // En-tête
-            'intro_title', 'intro_text',               // Introduction
-            'first_title', 'first_item1_title', 'first_item1_text', // Première section
-            'first_item2_title', 'first_item2_text',
-            'first_item3_title', 'first_item3_text',
-            'second_title', 'second_text', 'second_content', // Seconde section
-            'second_button_text', 'second_button_link',// Bouton
-            'cta_title', 'cta_text',                   // CTA
-            'about_title', 'about_text',               // À propos
-            'projects_title', 'gallery_title'          // Projets et galerie
-        ];
-
-        // Champs supplémentaires à mettre à jour (nouveaux champs d'icônes)
-        $fields = [
+            'header_title', 'header_subtitle', 'intro_title', 'intro_text',
             'first_title',
             'first_item1_icon', 'first_item1_title', 'first_item1_text',
             'first_item2_icon', 'first_item2_title', 'first_item2_text',
-            'first_item3_icon', 'first_item3_title', 'first_item3_text'
+            'first_item3_icon', 'first_item3_title', 'first_item3_text',
+            'second_title', 'second_text', 'second_content',
+            'second_button_text', 'second_button_link', 'cta_title', 'cta_text',
+            'about_title', 'about_text', 'projects_title', 'gallery_title'
         ];
 
-        // Fusion des deux tableaux pour une gestion unique dans la boucle
-        $sections = array_merge($sections, $fields);
-
-        // Ajout dynamique des champs statistiques (5 éléments)
         for ($i = 1; $i <= 5; $i++) {
-            array_push($sections, 
-                "second_stat{$i}_icon",    // Icône Font Awesome
-                "second_stat{$i}_number",  // Valeur numérique
-                "second_stat{$i}_label"    // Libellé texte
-            );
+            $sections[] = "second_stat{$i}_icon";
+            $sections[] = "second_stat{$i}_number";
+            $sections[] = "second_stat{$i}_label";
         }
 
-        // Préparation de la requête unique pour toutes les mises à jour
+        // Update the new columns too.
+        $sections[] = "first_item1_icon";
+        $sections[] = "first_item1_title";
+        $sections[] = "first_item1_text";
+        $sections[] = "first_item2_icon";
+        $sections[] = "first_item2_title";
+        $sections[] = "first_item2_text";
+        $sections[] = "first_item3_icon";
+        $sections[] = "first_item3_title";
+        $sections[] = "first_item3_text";
+
         $stmt = $conn->prepare("UPDATE home_content SET content = ? WHERE section_name = ?");
 
-        // Parcours de toutes les sections définies
         foreach ($sections as $section) {
-            // Récupération sécurisée de la valeur avec valeur par défaut
-            $value = $_POST[$section] ?? '';
-            
-            // Liaison des paramètres : valeur et nom de section
-            $stmt->bind_param('ss', $value, $section);
-            
-            // Exécution avec gestion d'erreur détaillée
-            if (!$stmt->execute()) {
-                throw new Exception("Erreur sur $section : " . $stmt->error);
+            if (isset($_POST[$section])) { // Check if the post variable is set
+                $value = $_POST[$section];
+                $stmt->bind_param('ss', $value, $section);
+
+                if (!$stmt->execute()) {
+                    throw new Exception("Erreur lors de la mise à jour de $section: " . $stmt->error);
+                }
             }
+
         }
 
-        // Validation globale si tout est OK
         $conn->commit();
         $_SESSION['message'] = "Mise à jour réussie !";
 
     } catch (Exception $e) {
-        // Annulation en cas d'erreur et stockage du message
         $conn->rollback();
-        $_SESSION['error'] = $e->getMessage();
+        $_SESSION['error'] = "Erreur: " . $e->getMessage();
     } finally {
-        // Nettoyage des ressources
-        $stmt->close();
-        $conn->close();
-        // Redirection quel que soit le résultat
+        if (isset($stmt)) $stmt->close();
+        if (isset($conn)) $conn->close();
         header('Location: dashboard.php');
         exit();
     }

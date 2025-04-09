@@ -157,43 +157,31 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                 </div>
             </section>
 
- <!-- Section Compétences -->
-<section id="first" class="main special">
-    <header class="major">
-        <h2><?= htmlspecialchars($home_data['first_title'] ?? 'Magna veroeros') ?></h2>
-        <?php if(!empty($home_data['first_text'])): ?>
-            <p><?= htmlspecialchars($home_data['first_text']) ?></p>
-        <?php endif; ?>
-    </header>
-    
-    <ul class="features">
-        <?php for($i = 1; $i <= 3; $i++): ?>
-            <li>
-                <span class="icon solid major style<?= $i ?> <?= htmlspecialchars($home_data["first_item{$i}_icon"] ?? 'fa-code') ?>"></span>
-                <h3><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? 'Titre par défaut') ?></h3>
-                <p><?= htmlspecialchars($home_data["first_item{$i}_text"] ?? 'Texte descriptif par défaut') ?></p>
-            </li>
-        <?php endfor; ?>
-    </ul>
+<!-- Section Compétences avec Icônes -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center text-purple-800 mb-12">
+            <?= htmlspecialchars($home_content['first_title'] ?? 'Mes Compétences') ?>
+        </h2>
 
-    <?php if(!empty($home_data['first_content'])): ?>
-        <div class="content">
-            <?= htmlspecialchars($home_data['first_content']) ?>
+        <div class="grid md:grid-cols-3 gap-8">
+            <?php for($i = 1; $i <= 3; $i++): ?>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-star') ?> text-5xl text-purple-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-3">
+                        <?= htmlspecialchars($home_content["first_item{$i}_title"] ?? '') ?>
+                    </h3>
+                    <p class="text-gray-600">
+                        <?= htmlspecialchars($home_content["first_item{$i}_text"] ?? '') ?>
+                    </p>
+                </div>
+            <?php endfor; ?>
         </div>
-    <?php endif; ?>
-
-    <footer class="major">
-        <?php if(!empty($home_data['first_button_text']) && !empty($home_data['first_button_link'])): ?>
-            <ul class="actions special">
-                <li>
-                    <a href="<?= htmlspecialchars($home_data['first_button_link']) ?>" class="button">
-                        <?= htmlspecialchars($home_data['first_button_text']) ?>
-                    </a>
-                </li>
-            </ul>
-        <?php endif; ?>
-    </footer>
+    </div>
 </section>
+
+
+
 
 
 
