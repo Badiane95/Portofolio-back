@@ -160,25 +160,44 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
 <!-- Section Compétences avec Icônes -->
 <section class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center text-purple-800 mb-12">
-            <?= htmlspecialchars($home_content['first_title'] ?? 'Mes Compétences') ?>
-        </h2>
+        <header class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-purple-800 mb-4">
+                <?= htmlspecialchars($home_content['first_title'] ?? 'Mes Compétences') ?>
+            </h2>
+            <?php if(!empty($home_content['first_subtitle'])): ?>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                <?= htmlspecialchars($home_content['first_subtitle']) ?>
+            </p>
+            <?php endif; ?>
+        </header>
 
-        <div class="grid md:grid-cols-3 gap-8">
+        <div class="flex flex-wrap justify-center gap-6 mx-auto max-w-6xl">
             <?php for($i = 1; $i <= 3; $i++): ?>
-                <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                    <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-star') ?> text-5xl text-purple-600 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-3">
-                        <?= htmlspecialchars($home_content["first_item{$i}_title"] ?? '') ?>
-                    </h3>
-                    <p class="text-gray-600">
-                        <?= htmlspecialchars($home_content["first_item{$i}_text"] ?? '') ?>
-                    </p>
+            <div class="text-center p-6 bg-white rounded-lg shadow-lg border border-gray-200 w-full sm:w-[calc(50%-1.5rem)] md:w-[calc(33.33%-1.5rem)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="mb-4">
+                    <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-star') ?> text-5xl text-purple-600"></i>
                 </div>
+                <h3 class="text-xl font-semibold mb-3">
+                    <?= htmlspecialchars($home_content["first_item{$i}_title"] ?? '') ?>
+                </h3>
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    <?= htmlspecialchars($home_content["first_item{$i}_text"] ?? '') ?>
+                </p>
+            </div>
             <?php endfor; ?>
         </div>
+
+        <?php if(!empty($home_content['first_button_text']) && !empty($home_content['first_button_link'])): ?>
+        <footer class="mt-12 text-center">
+            <a href="<?= htmlspecialchars($home_content['first_button_link']) ?>" 
+               class="inline-block bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors duration-300">
+                <?= htmlspecialchars($home_content['first_button_text']) ?>
+            </a>
+        </footer>
+        <?php endif; ?>
     </div>
 </section>
+
 
 
 
