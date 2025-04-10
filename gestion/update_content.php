@@ -21,11 +21,7 @@ while ($row = $result_home_content->fetch_assoc()) {
     // Mappage général des sections
     $home_data[$row['section_name']] = $row['content'];
     
-    // Récupération spécifique des nouvelles compétences
-    $home_data['first_item1_icon'] = $row['first_item1_icon'];
-    $home_data['first_item1_title'] = $row['first_item1_title'];
-    $home_data['first_item1_text'] = $row['first_item1_text'];
-    // ... (répété pour les 3 items)
+    
 }
 
 // Traitement du formulaire en POST
@@ -53,12 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sections[] = "second_stat{$i}_label";
         }
 
-        // Ajout explicite des nouvelles compétences
-        $sections = array_merge($sections, [
-            "first_item1_icon", "first_item1_title", "first_item1_text",
-            "first_item2_icon", "first_item2_title", "first_item2_text",
-            "first_item3_icon", "first_item3_title", "first_item3_text"
-        ]);
+      
 
         // Préparation de la requête préparée
         $stmt = $conn->prepare("UPDATE home_content SET content = ? WHERE section_name = ?");

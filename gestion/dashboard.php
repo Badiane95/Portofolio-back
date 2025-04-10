@@ -42,16 +42,6 @@ $home_data = [];
 while ($row = $result_home_content->fetch_assoc()) {
     $home_data[$row['section_name']] = $row['content'];
 
-    // Also load the new competence fields.
-    $home_data['first_item1_icon'] = $row['first_item1_icon'];
-    $home_data['first_item1_title'] = $row['first_item1_title'];
-    $home_data['first_item1_text'] = $row['first_item1_text'];
-    $home_data['first_item2_icon'] = $row['first_item2_icon'];
-    $home_data['first_item2_title'] = $row['first_item2_title'];
-    $home_data['first_item2_text'] = $row['first_item2_text'];
-    $home_data['first_item3_icon'] = $row['first_item3_icon'];
-    $home_data['first_item3_title'] = $row['first_item3_title'];
-    $home_data['first_item3_text'] = $row['first_item3_text'];
 }
 
 
@@ -173,7 +163,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         <h1 class="text-3xl font-bold text-purple-800 mb-6">
             <i class="fas fa-tachometer-alt mr-2"></i>Bienvenue, <?php echo $_SESSION['admin']; ?> !
         </h1>
-<!-- Ajoutez ce code juste après la balise <body> et avant votre navigation -->
+<!-- Rechercher-->
 <div class="max-w-7xl mx-auto mt-4 px-4 sm:px-6 lg:px-8">
     <form action="" method="GET" class="mb-6">
         <div class="relative">
@@ -766,81 +756,60 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                           class="w-full p-2 border border-purple-200 rounded-md"><?= htmlspecialchars($home_data['intro_text'] ?? '') ?></textarea>
                             </div>
                         </div>
-                  <!-- Section Compétences -->
-<div class="space-y-4 p-4 bg-purple-50 rounded-lg">
-<h3 class="text-lg font-semibold text-purple-600">Section Compétences</h3>
+                      <!-- Section  Compétences-->
+                        <div class="space-y-4 p-4 bg-purple-50 rounded-lg">
+    <h3 class="text-lg font-semibold text-purple-600">Section Compétences</h3>
 
-<!-- Prévisualisation en temps réel -->
-<div class="mb-6 p-4 border border-purple-200 rounded-lg">
-<h4 class="text-md font-semibold text-purple-600 mb-2">Aperçu</h4>
-<div class="grid grid-cols-3 gap-4">
-<?php for($i = 1; $i <= 3; $i++): ?>
-<div class="text-center p-3 bg-white rounded-lg shadow">
-<i class="<?= htmlspecialchars($home_data["first_item{$i}_icon"] ?? '') ?> text-3xl text-purple-600 mb-2"></i>
-<div class="font-bold text-xl"><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?></div>
-<div class="text-sm"><?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?></div>
-</div>
-<?php endfor; ?>
-</div>
-</div>
+    <!-- Prévisualisation en temps réel -->
+    <div class="mb-6 p-4 border border-purple-200 rounded-lg">
+        <h4 class="text-md font-semibold text-purple-600 mb-2">Aperçu</h4>
+        <div class="grid grid-cols-3 gap-4">
+            <?php for($i = 1; $i <= 3; $i++): ?>
+            <div class="text-center p-3 bg-white rounded-lg shadow">
+                <i class="<?= htmlspecialchars($home_data["second_stat{$i}_icon"] ?? '') ?> text-3xl text-purple-600 mb-2"></i>
+                <div class="font-bold text-xl"><?= htmlspecialchars($home_data["second_stat{$i}_title"] ?? '') ?></div>
+                <div class="text-sm"><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?></div>
+            </div>
+            <?php endfor; ?>
+        </div>
+    </div>
 
-<div>
-<label class="block text-sm font-medium text-purple-700 mb-1">Titre principal</label>
-<input type="text" name="first_title" id="first_title"
-class="w-full p-2 border border-purple-200 rounded-md"
-value="<?= htmlspecialchars($home_data['first_title'] ?? 'Titre principal') ?>">
-</div>
+    <div>
+        <label class="block text-sm font-medium text-purple-700 mb-1">Titre principal</label>
+        <input type="text" name="first_title" id="first_title"
+               class="w-full p-2 border border-purple-200 rounded-md"
+               value="<?= htmlspecialchars($home_data['first_title'] ?? 'Titre principal') ?>">
+    </div>
 
-<div>
-<label class="block text-sm font-medium text-purple-700 mb-1">Sous-titre</label>
-<input type="text" name="first_subtitle" id="first_subtitle"
-class="w-full p-2 border border-purple-200 rounded-md"
-value="<?= htmlspecialchars($home_data['first_subtitle'] ?? '') ?>">
-</div>
+    <!-- Champs pour les éléments avec icônes -->
+    <?php for($i = 1; $i <= 3; $i++): ?>
+    <div class="space-y-2 pl-4 border-l-2 border-purple-200 bg-white p-4 rounded-lg shadow-sm">
+        <label class="block text-sm font-medium text-purple-700">Élément <?= $i ?></label>
 
-<!-- Champs pour les éléments avec icônes -->
-<?php for($i = 1; $i <= 3; $i++): ?>
-<div class="space-y-2 pl-4 border-l-2 border-purple-200 bg-white p-4 rounded-lg shadow-sm">
-<label class="block text-sm font-medium text-purple-700">Élément <?= $i ?></label>
+        <div class="flex items-center mb-3">
+            <span class="text-purple-600 mr-2">Icône:</span>
+            <input type="text"
+                   name="first_item<?= $i ?>_icon"
+                   class="flex-1 p-2 border-b-2 border-purple-100 focus:border-purple-500"
+                   placeholder="Classe Font Awesome (ex: fa-solid fa-star)"
+                   value="<?= htmlspecialchars($home_data["second_stat{$i}_icon"] ?? '') ?>">
+        </div>
 
-<div class="flex items-center mb-3">
-<span class="text-purple-600 mr-2">Icône:</span>
-<input type="text"
-name="first_item<?= $i ?>_icon"
-class="flex-1 p-2 border-b-2 border-purple-100 focus:border-purple-500"
-placeholder="Classe Font Awesome (ex: fa-solid fa-star)"
-value="<?= htmlspecialchars($home_data["first_item{$i}_icon"] ?? '') ?>">
-</div>
+        <div class="grid grid-cols-1 gap-4">
+            <input type="text"
+                   name="first_item<?= $i ?>_title"
+                   placeholder="Titre"
+                   class="w-full p-2 border border-purple-100 rounded-md"
+                   value="<?= htmlspecialchars($home_data["second_stat{$i}_title"] ?? '') ?>">
 
-<div class="grid grid-cols-1 gap-4">
-<input type="text"
-name="first_item<?= $i ?>_title"
-placeholder="Titre"
-class="w-full p-2 border border-purple-100 rounded-md"
-value="<?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?>">
-
-<input type="text"
-name="first_item<?= $i ?>_text"
-placeholder="Texte"
-class="w-full p-2 border border-purple-100 rounded-md"
-value="<?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?>">
-</div>
-</div>
-<?php endfor; ?>
-
-<div>
-<label class="block text-sm font-medium text-purple-700 mb-1">Texte du bouton</label>
-<input type="text" name="first_button_text" id="first_button_text"
-class="w-full p-2 border border-purple-200 rounded-md"
-value="<?= htmlspecialchars($home_data['first_button_text'] ?? '') ?>">
-</div>
-
-<div>
-<label class="block text-sm font-medium text-purple-700 mb-1">Lien du bouton</label>
-<input type="text" name="first_button_link" id="first_button_link"
-class="w-full p-2 border border-purple-200 rounded-md"
-value="<?= htmlspecialchars($home_data['first_button_link'] ?? '') ?>">
-</div>
+            <input type="text"
+                   name="first_item<?= $i ?>_text"
+                   placeholder="Texte"
+                   class="w-full p-2 border border-purple-100 rounded-md"
+                   value="<?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?>">
+        </div>
+    </div>
+    <?php endfor; ?>
 </div>
 
 
