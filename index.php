@@ -158,19 +158,18 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
             </section>
 
 <!-- Section Compétences avec Icônes -->
-<section class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
-        <header class="text-center mb-12">
-            <h2><?= htmlspecialchars($home_content['first_title'] ?? 'Magna veroeros') ?></h2>            </h2>
-            <?php if(!empty($home_content['first_subtitle'])): ?>
+<section id="first" class="main special">
+    <header class="major">
+        <h2><?= htmlspecialchars($home_content['first_title'] ?? 'Magna veroeros') ?></h2>
+        <?php if(!empty($home_content['first_subtitle'])): ?>
             <p class="text-gray-600 max-w-2xl mx-auto">
                 <?= htmlspecialchars($home_content['first_subtitle']) ?>
             </p>
-            <?php endif; ?>
-        </header>
-
-        <div class="flex flex-wrap justify-center gap-6 mx-auto max-w-6xl">
-            <?php for($i = 1; $i <= 3; $i++): ?>
+        <?php endif; ?>
+    </header>
+    
+    <div class="flex flex-wrap justify-center gap-6 mx-auto max-w-6xl">
+        <?php for($i = 1; $i <= 3; $i++): ?>
             <div class="text-center p-6 bg-white rounded-lg shadow-lg border border-gray-200 w-full sm:w-[calc(50%-1.5rem)] md:w-[calc(33.33%-1.5rem)] hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div class="mb-4">
                     <i class="<?= htmlspecialchars($home_content["second_stat{$i}_icon"] ?? 'fa-solid fa-star') ?> text-5xl text-purple-600"></i>
@@ -182,19 +181,20 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
                     <?= htmlspecialchars($home_content["first_item{$i}_text"] ?? '') ?>
                 </p>
             </div>
-            <?php endfor; ?>
-        </div>
-        
-
-        <?php if(!empty($home_content['first_button_text']) && !empty($home_content['first_button_link'])): ?>
-        <footer class="mt-12 text-center">
-            <a href="<?= htmlspecialchars($home_content['first_button_link']) ?>" 
-               class="inline-block bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors duration-300">
-                <?= htmlspecialchars($home_content['first_button_text']) ?>
-            </a>
-        </footer>
-        <?php endif; ?>
+        <?php endfor; ?>
     </div>
+
+    <footer class="major mt-8">
+        <?php if(!empty($home_content['second_button_text']) && !empty($home_content['second_button_link'])): ?>
+            <ul class="actions special">
+                <li>
+                    <a href="<?= htmlspecialchars($home_content['second_button_link']) ?>" class="button bg-purple-600 text-white hover:bg-purple-700">
+                        <?= htmlspecialchars($home_content['second_button_text']) ?>
+                    </a>
+                </li>
+            </ul>
+        <?php endif; ?>
+    </footer>
 </section>
 
 
@@ -225,18 +225,6 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
         <?= htmlspecialchars($home_content['second_content']) ?>
     </p>
     <?php endif; ?>
-
-    <footer class="major mt-8">
-        <?php if(!empty($home_content['second_button_text']) && !empty($home_content['second_button_link'])): ?>
-        <ul class="actions special">
-            <li>
-                <a href="<?= htmlspecialchars($home_content['second_button_link']) ?>" class="button bg-purple-600 text-white hover:bg-purple-700">
-                    <?= htmlspecialchars($home_content['second_button_text']) ?>
-                </a>
-            </li>
-        </ul>
-        <?php endif; ?>
-    </footer>
 </section>
 
 
@@ -250,7 +238,121 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
             <li style="list-style: none;"><a href="generic.php" class="button">Mon CV</a></li>
 
         </header>
-        
+        <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+$fields = [
+    [
+        'field_name' => 'name',
+        'label' => 'Nom',
+        'field_type' => 'text',
+        'placeholder' => 'Votre nom',
+        'is_required' => true,
+        'options' => ''
+    ],
+    [
+        'field_name' => 'email',
+        'label' => 'Email',
+        'field_type' => 'email',
+        'placeholder' => 'Votre email',
+        'is_required' => true,
+        'options' => ''
+    ],
+    [
+        'field_name' => 'contact_type',
+        'label' => 'Type de contact',
+        'field_type' => 'select',
+        'placeholder' => '',
+        'is_required' => true,
+        'options' => 'Question, Devis, Collaboration, Autre'
+    ],
+    [
+        'field_name' => 'message',
+        'label' => 'Message',
+        'field_type' => 'textarea',
+        'placeholder' => 'Votre message',
+        'is_required' => true,
+        'options' => ''
+    ]
+];
+
+function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Vérification dynamique des champs requis
+    foreach ($fields as $field) {
+        if ($field['is_required'] && empty($_POST[$field['field_name']])) {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode([
+                "status" => "error", 
+                "message" => "Le champ {$field['label']} est requis"
+            ]);
+            exit();
+        }
+    }
+
+    if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error", 
+            "message" => "Format d'email invalide"
+        ]);
+        exit();
+    }
+
+    // Nettoyage des données
+    $name = test_input($_POST['name']);
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $contact_type = test_input($_POST['contact_type']);
+    $message = test_input($_POST['message']);
+
+    // Préparation de l'e-mail
+    $to = "badiane.falou95@gmail.com";
+    $subject = "[$contact_type] Nouveau message de $name";
+    
+    $body = "Nom: $name\n";
+    $body .= "Email: $email\n";
+    $body .= "Type: $contact_type\n\n";
+    $body .= "Message:\n$message";
+
+    // En-têtes sécurisés
+    $headers = [
+        'From' => 'noreply@' . $_SERVER['SERVER_NAME'],
+        'Reply-To' => $email,
+        'Content-Type' => 'text/plain; charset=UTF-8',
+        'X-Mailer' => 'PHP/' . phpversion()
+    ];
+
+    $headers_str = '';
+    foreach ($headers as $key => $value) {
+        $headers_str .= "$key: $value\r\n";
+    }
+
+    header('Content-Type: application/json');
+    
+    if (mail($to, $subject, $body, $headers_str)) {
+        echo json_encode([
+            "status" => "success", 
+            "message" => "Message envoyé avec succès !"
+        ]);
+    } else {
+        http_response_code(500);
+        echo json_encode([
+            "status" => "error", 
+            "message" => "Erreur lors de l'envoi du message"
+        ]);
+    }
+    exit();
+}
+?>
+
 <!-- Section Contact -->
 <section class="main special">
     <header class="major">
@@ -260,44 +362,51 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
         <section>
             <div id="message" class="hidden p-4 mb-4 rounded-lg text-center"></div>
 
-            <form method="post" action="send_mail.php" id="contactForm" class="alt">
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" id="contactForm" class="alt">
                 <div class="row gtr-uniform" style="text-align: left;">
                     <?php foreach($fields as $field): ?>
                     <div class="<?= $field['field_type'] === 'select' ? 'col-12' : 'col-6 col-12-xsmall' ?>">
                         <label for="<?= $field['field_name'] ?>">
                             <?= htmlspecialchars($field['label']) ?>
-                            <?= $field['is_required'] ? '<span class="text-red-500">*</span>' : '' ?>
+                            <?= $field['is_required'] ? '<span class="required">*</span>' : '' ?>
                         </label>
                         
                         <?php if($field['field_type'] === 'select'): ?>
                             <select name="<?= $field['field_name'] ?>" 
-                                    class="w-full p-2 border rounded">
+                                    id="<?= $field['field_name'] ?>"
+                                    class="w-full p-2 border rounded"
+                                    <?= $field['is_required'] ? 'required' : '' ?>>
                                 <option value="" disabled selected>Choisir...</option>
-                                <?php foreach(explode(',', $field['options']) as $option): ?>
-                                <option value="<?= strtolower(trim($option)) ?>">
-                                    <?= htmlspecialchars(trim($option)) ?>
+                                <?php foreach(explode(',', $field['options']) as $option): 
+                                    $option = trim($option);
+                                ?>
+                                <option value="<?= htmlspecialchars($option) ?>">
+                                    <?= htmlspecialchars($option) ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
                         
                         <?php elseif($field['field_type'] === 'textarea'): ?>
                             <textarea name="<?= $field['field_name'] ?>" 
+                                      id="<?= $field['field_name'] ?>"
                                       class="w-full p-2 border rounded"
                                       rows="5"
-                                      placeholder="<?= htmlspecialchars($field['placeholder']) ?>"></textarea>
+                                      placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
+                                      <?= $field['is_required'] ? 'required' : '' ?>></textarea>
                         
                         <?php else: ?>
                             <input type="<?= $field['field_type'] ?>" 
+                                   id="<?= $field['field_name'] ?>"
                                    class="w-full p-2 border rounded"
                                    name="<?= $field['field_name'] ?>"
-                                   placeholder="<?= htmlspecialchars($field['placeholder']) ?>">
+                                   placeholder="<?= htmlspecialchars($field['placeholder']) ?>"
+                                   <?= $field['is_required'] ? 'required' : '' ?>>
                         <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
 
                     <div class="col-12 text-center mt-6">
-                        <button type="submit" 
-                                class="bg-purple-600 text-white px-1 py-1 rounded-lg hover:bg-purple-700 transition-all">
+                        <button type="submit" class="primary">
                             <i class="fas fa-paper-plane mr-2"></i>Envoyer
                         </button>
                     </div>
@@ -306,6 +415,40 @@ $conn->close(); // Fermeture de la connexion APRÈS toutes les requêtes
         </section>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contactForm');
+    const messageDiv = document.getElementById('message');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        messageDiv.className = 'hidden p-4 mb-4 rounded-lg text-center';
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form)
+        })
+        .then(response => {
+            if (!response.ok) return response.json().then(err => Promise.reject(err));
+            return response.json();
+        })
+        .then(data => {
+            messageDiv.classList.remove('hidden');
+            messageDiv.className = `p-4 mb-4 rounded-lg text-center ${data.status === 'success' ? 
+                'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+            messageDiv.textContent = data.message;
+            if (data.status === 'success') form.reset();
+        })
+        .catch(error => {
+            messageDiv.classList.remove('hidden');
+            messageDiv.className = 'p-4 mb-4 rounded-lg text-center bg-red-100 text-red-800';
+            messageDiv.textContent = error.message || 'Une erreur s\'est produite';
+        });
+    });
+});
+</script>
+
 
 </div>
 

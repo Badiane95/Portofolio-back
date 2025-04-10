@@ -18,10 +18,17 @@ $home_data = [];
 
 // Construction du tableau associatif des données existantes
 while ($row = $result_home_content->fetch_assoc()) {
-    // Mappage général des sections
+    // Récupère la valeur de la colonne du nom de section
     $home_data[$row['section_name']] = $row['content'];
     
+    // Récupère également les valeurs des colonnes spécifiques pour les éléments avec icônes
+    if (isset($row['first_title'])) $home_data['first_title'] = $row['first_title'];
     
+    for ($i = 1; $i <= 3; $i++) {
+        if (isset($row["first_item{$i}_icon"])) $home_data["first_item{$i}_icon"] = $row["first_item{$i}_icon"];
+        if (isset($row["first_item{$i}_title"])) $home_data["first_item{$i}_title"] = $row["first_item{$i}_title"];
+        if (isset($row["first_item{$i}_text"])) $home_data["first_item{$i}_text"] = $row["first_item{$i}_text"];
+    }
 }
 
 // Traitement du formulaire en POST

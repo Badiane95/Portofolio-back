@@ -71,68 +71,102 @@ function searchContent($conn, $query) {
         'social_media' => [],
         'contact_form' => []
     ];
-    
-    $search = '%' . $conn->real_escape_string($query) . '%';
-    
-    // Recherche dans les projets
-    $stmt = $conn->prepare("SELECT * FROM projects WHERE name LIKE ? OR description LIKE ? OR status LIKE ?");
-    $stmt->bind_param("sss", $search, $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['projects'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les vidéos
-    $stmt = $conn->prepare("SELECT * FROM videos WHERE title LIKE ? OR description LIKE ?");
-    $stmt->bind_param("ss", $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['videos'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les compétences
-    $stmt = $conn->prepare("SELECT * FROM skills WHERE title LIKE ? OR description LIKE ? OR icon LIKE ?");
-    $stmt->bind_param("sss", $search, $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['skills'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les adhérents
-    $stmt = $conn->prepare("SELECT * FROM adherents WHERE nom LIKE ? OR prenom LIKE ? OR email LIKE ?");
-    $stmt->bind_param("sss", $search, $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['adherents'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les images
-    $stmt = $conn->prepare("SELECT * FROM images WHERE title LIKE ? OR filename LIKE ?");
-    $stmt->bind_param("ss", $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['images'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les CV
-    $stmt = $conn->prepare("SELECT * FROM cv WHERE nom_cv LIKE ?");
-    $stmt->bind_param("s", $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['cv'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les médias sociaux
-    $stmt = $conn->prepare("SELECT * FROM social_media WHERE nom LIKE ? OR link LIKE ?");
-    $stmt->bind_param("ss", $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['social_media'] = $result->fetch_all(MYSQLI_ASSOC);
-    
-    // Recherche dans les champs du formulaire
-    $stmt = $conn->prepare("SELECT * FROM contact_form WHERE field_name LIKE ? OR label LIKE ?");
-    $stmt->bind_param("ss", $search, $search);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $results['contact_form'] = $result->fetch_all(MYSQLI_ASSOC);
-    
+
+    // Échappement personnalisé des caractères spéciaux
+    $searchTerm = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $query);
+    $search = '%' . $searchTerm . '%';
+
+    try {
+        // Requête pour les projets
+        $stmt = $conn->prepare("
+            SELECT * FROM projects 
+            WHERE name LIKE ? ESCAPE '!' 
+            OR description LIKE ? ESCAPE '!' 
+            OR status LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("sss", $search, $search, $search);
+        $stmt->execute();
+        $results['projects'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour les vidéos
+        $stmt = $conn->prepare("
+            SELECT * FROM videos 
+            WHERE title LIKE ? ESCAPE '!' 
+            OR description LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("ss", $search, $search);
+        $stmt->execute();
+        $results['videos'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour les compétences
+        $stmt = $conn->prepare("
+            SELECT * FROM skills 
+            WHERE title LIKE ? ESCAPE '!' 
+            OR description LIKE ? ESCAPE '!' 
+            OR icon LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("sss", $search, $search, $search);
+        $stmt->execute();
+        $results['skills'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour les adhérents
+        $stmt = $conn->prepare("
+            SELECT * FROM adherents 
+            WHERE nom LIKE ? ESCAPE '!' 
+            OR prenom LIKE ? ESCAPE '!' 
+            OR email LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("sss", $search, $search, $search);
+        $stmt->execute();
+        $results['adherents'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour les images
+        $stmt = $conn->prepare("
+            SELECT * FROM images 
+            WHERE title LIKE ? ESCAPE '!' 
+            OR filename LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("ss", $search, $search);
+        $stmt->execute();
+        $results['images'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour les CV
+        $stmt = $conn->prepare("
+            SELECT * FROM cv 
+            WHERE nom_cv LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("s", $search);
+        $stmt->execute();
+        $results['cv'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour les médias sociaux
+        $stmt = $conn->prepare("
+            SELECT * FROM social_media 
+            WHERE nom LIKE ? ESCAPE '!' 
+            OR link LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("ss", $search, $search);
+        $stmt->execute();
+        $results['social_media'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour le formulaire de contact
+        $stmt = $conn->prepare("
+            SELECT * FROM contact_form 
+            WHERE field_name LIKE ? ESCAPE '!' 
+            OR label LIKE ? ESCAPE '!'
+        ");
+        $stmt->bind_param("ss", $search, $search);
+        $stmt->execute();
+        $results['contact_form'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    } catch (mysqli_sql_exception $e) {
+        error_log("Erreur SQL : " . $e->getMessage());
+        $_SESSION['error'] = "Erreur technique lors de la recherche";
+        return [];
+    }
+
     return $results;
 }
-
 // Si une recherche est lancée
 $search_results = [];
 $search_query = '';
@@ -270,7 +304,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                             <?= htmlspecialchars($item['name']) ?>
                                                         </h4>
                                                         <p class="text-sm text-gray-600 mt-1">
-                                                            <?= htmlspecialchars(substr($item['description'], 0, 100)) ?>...
+                                                            <?= htmlspecialchars(substr($item['description'], 0, 600), ENT_QUOTES) ?>...
                                                         </p>
                                                         <div class="text-xs text-gray-500 mt-1">
                                                             Statut: 
@@ -304,10 +338,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                 <div class="flex justify-between items-start">
                                                     <div>
                                                         <h4 class="text-lg font-medium text-purple-800">
-                                                            <?= htmlspecialchars($item['title']) ?>
+                                                            <?= htmlspecialchars($item['title'], ENT_QUOTES) ?>
                                                         </h4>
                                                         <p class="text-sm text-gray-600 mt-1">
-                                                            <?= htmlspecialchars(substr($item['description'], 0, 100)) ?>...
+                                                            <?= htmlspecialchars(substr($item['description'], 0, 600), ENT_QUOTES) ?>
                                                         </p>
                                                         <div class="text-xs text-gray-500 mt-1">
                                                             <?= date('d/m/Y', strtotime($item['created_at'])) ?>
@@ -329,10 +363,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                         <i class="fas fa-<?= htmlspecialchars($item['icon']) ?> text-purple-600 text-lg mr-3"></i>
                                                         <div>
                                                             <h4 class="text-lg font-medium text-purple-800">
-                                                                <?= htmlspecialchars($item['title']) ?>
+                                                                <?= htmlspecialchars($item['title'], ENT_QUOTES) ?>
                                                             </h4>
                                                             <p class="text-sm text-gray-600 mt-1">
-                                                                <?= htmlspecialchars(substr($item['description'], 0, 100)) ?>...
+                                                                <?= htmlspecialchars(substr($item['description'], 0, 600), ENT_QUOTES) ?>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -354,10 +388,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                              class="w-10 h-10 rounded-full object-cover border-2 border-purple-200 mr-3">
                                                         <div>
                                                             <h4 class="text-lg font-medium text-purple-800">
-                                                                <?= htmlspecialchars($item['prenom']) ?> <?= htmlspecialchars($item['nom']) ?>
+                                                                <?= htmlspecialchars($item['prenom'], ENT_QUOTES) ?> <?= htmlspecialchars($item['nom']) ?>
                                                             </h4>
                                                             <p class="text-sm text-gray-600 mt-1">
-                                                                <?= htmlspecialchars($item['email']) ?>
+                                                                <?= htmlspecialchars($item['email'], ENT_QUOTES) ?>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -375,11 +409,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                 <div class="flex justify-between items-start">
                                                     <div class="flex items-center">
                                                         <img src="/BUT2/S4/Portofolio-Back/lib/uploadPhoto/<?= htmlspecialchars($item['filename']) ?>" 
-                                                             alt="<?= htmlspecialchars($item['title']) ?>" 
+                                                             alt="<?= htmlspecialchars($item['title'], ENT_QUOTES) ?>" 
                                                              class="w-16 h-16 object-cover rounded-md mr-3">
                                                         <div>
                                                             <h4 class="text-lg font-medium text-purple-800">
-                                                                <?= htmlspecialchars($item['title']) ?>
+                                                                <?= htmlspecialchars($item['title'], ENT_QUOTES) ?>
                                                             </h4>
                                                             <p class="text-xs text-gray-500 mt-1">
                                                                 Ajouté le <?= date('d/m/Y', strtotime($item['upload_date'])) ?>
@@ -429,7 +463,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                 <div class="flex justify-between items-start">
                                                     <div>
                                                         <h4 class="text-lg font-medium text-purple-800">
-                                                            <?= htmlspecialchars($item['nom']) ?>
+                                                            <?= htmlspecialchars($item['nom'], ENT_QUOTES) ?>
                                                         </h4>
                                                         <a href="<?= htmlspecialchars($item['link']) ?>" target="_blank" class="text-sm text-purple-600 hover:text-purple-900 mt-1">
                                                             <?= htmlspecialchars($item['link']) ?>
@@ -452,10 +486,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                                             <?= htmlspecialchars($item['label']) ?>
                                                         </h4>
                                                         <p class="text-sm text-gray-600 mt-1">
-                                                            Champ: <?= htmlspecialchars($item['field_name']) ?>
+                                                            Champ: <?= htmlspecialchars($item['field_name'], ENT_QUOTES) ?>
                                                         </p>
                                                         <p class="text-xs text-gray-500 mt-1">
-                                                            Type: <?= ucfirst(htmlspecialchars($item['field_type'])) ?>
+                                                            Type: <?= ucfirst(htmlspecialchars($item['field_type']), ENT_QUOTES) ?>
                                                         </p>
                                                     </div>
                                                     <div class="flex space-x-2">
@@ -756,8 +790,8 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                           class="w-full p-2 border border-purple-200 rounded-md"><?= htmlspecialchars($home_data['intro_text'] ?? '') ?></textarea>
                             </div>
                         </div>
-                      <!-- Section  Compétences-->
-                        <div class="space-y-4 p-4 bg-purple-50 rounded-lg">
+       <!-- Section Compétences -->
+<div class="space-y-4 p-4 bg-purple-50 rounded-lg">
     <h3 class="text-lg font-semibold text-purple-600">Section Compétences</h3>
 
     <!-- Prévisualisation en temps réel -->
@@ -765,53 +799,60 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         <h4 class="text-md font-semibold text-purple-600 mb-2">Aperçu</h4>
         <div class="grid grid-cols-3 gap-4">
             <?php for($i = 1; $i <= 3; $i++): ?>
-            <div class="text-center p-3 bg-white rounded-lg shadow">
-                <i class="<?= htmlspecialchars($home_data["second_stat{$i}_icon"] ?? '') ?> text-3xl text-purple-600 mb-2"></i>
-                <div class="font-bold text-xl"><?= htmlspecialchars($home_data["second_stat{$i}_title"] ?? '') ?></div>
-                <div class="text-sm"><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?></div>
-            </div>
+                <div class="text-center p-3 bg-white rounded-lg shadow">
+                    <i class="<?= htmlspecialchars($home_data["second_stat{$i}_icon"] ?? '') ?> text-3xl text-purple-600 mb-2"></i>
+                    <div class="font-bold text-xl"><?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?></div>
+                    <div class="text-sm"><?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?></div>
+                </div>
             <?php endfor; ?>
         </div>
     </div>
 
     <div>
         <label class="block text-sm font-medium text-purple-700 mb-1">Titre principal</label>
-        <input type="text" name="first_title" id="first_title"
+        <input type="text" name="first_title" id="first_title" 
                class="w-full p-2 border border-purple-200 rounded-md"
-               value="<?= htmlspecialchars($home_data['first_title'] ?? 'Titre principal') ?>">
+               value="<?= htmlspecialchars($home_data['first_title'] ?? '') ?>">
     </div>
 
     <!-- Champs pour les éléments avec icônes -->
     <?php for($i = 1; $i <= 3; $i++): ?>
-    <div class="space-y-2 pl-4 border-l-2 border-purple-200 bg-white p-4 rounded-lg shadow-sm">
-        <label class="block text-sm font-medium text-purple-700">Élément <?= $i ?></label>
+        <div class="space-y-2 pl-4 border-l-2 border-purple-200 bg-white p-4 rounded-lg shadow-sm">
+            <label class="block text-sm font-medium text-purple-700">Élément <?= $i ?></label>
 
-        <div class="flex items-center mb-3">
-            <span class="text-purple-600 mr-2">Icône:</span>
-            <input type="text"
-                   name="first_item<?= $i ?>_icon"
-                   class="flex-1 p-2 border-b-2 border-purple-100 focus:border-purple-500"
-                   placeholder="Classe Font Awesome (ex: fa-solid fa-star)"
-                   value="<?= htmlspecialchars($home_data["second_stat{$i}_icon"] ?? '') ?>">
+            <div class="flex items-center mb-3">
+                <span class="text-purple-600 mr-2">Icône:</span>
+                <input type="text"
+                       name="first_item<?= $i ?>_icon"
+                       class="flex-1 p-2 border-b-2 border-purple-100 focus:border-purple-500"
+                       placeholder="Classe Font Awesome (ex: fa-solid fa-star)"
+                       value="<?= htmlspecialchars($home_data["second_stat{$i}_icon"] ?? '') ?>">
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <input type="text" name="first_item<?= $i ?>_title" placeholder="Titre" class="w-full p-2 border border-purple-100 rounded-md" value="<?= htmlspecialchars($home_data["first_item{$i}_title"] ?? '') ?>">
+
+                <input type="text" name="first_item<?= $i ?>_text" placeholder="Texte" class="w-full p-2 border border-purple-100 rounded-md" value="<?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?>">
+            </div>
         </div>
+    <?php endfor; ?>
 
-        <div class="grid grid-cols-1 gap-4">
-            <input type="text"
-                   name="first_item<?= $i ?>_title"
-                   placeholder="Titre"
-                   class="w-full p-2 border border-purple-100 rounded-md"
-                   value="<?= htmlspecialchars($home_data["second_stat{$i}_title"] ?? '') ?>">
-
-            <input type="text"
-                   name="first_item<?= $i ?>_text"
-                   placeholder="Texte"
-                   class="w-full p-2 border border-purple-100 rounded-md"
-                   value="<?= htmlspecialchars($home_data["first_item{$i}_text"] ?? '') ?>">
+    <!-- Bouton global de la section -->
+    <div class="mt-6 pt-4 border-t border-purple-200">
+        <h4 class="font-medium text-purple-700 mb-3">Bouton principal de la section</h4>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-purple-700 mb-1">Texte du bouton principal</label>
+                <input type="text" name="second_button_text" class="w-full p-2 border border-purple-200 rounded-md" 
+                       value="<?= htmlspecialchars($home_data['second_button_text'] ?? '') ?>">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-purple-700 mb-1">Lien du bouton principal</label>
+                <input type="url" name="second_button_link" class="w-full p-2 border border-purple-200 rounded-md" 
+                       value="<?= htmlspecialchars($home_data['second_button_link'] ?? '') ?>">
+            </div>
         </div>
     </div>
-    <?php endfor; ?>
 </div>
-
 
                         <!-- Section À propos -->
                         <div class="space-y-4 p-4 bg-purple-50 rounded-lg">
@@ -922,20 +963,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                     htmlspecialchars($home_data['second_content'] ?? '') ?></textarea>
                             </div>
 
-                            <!-- Bouton -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-purple-700 mb-1">Texte du bouton</label>
-                                    <input type="text" name="second_button_text" class="w-full p-2 border border-purple-200 rounded-md" 
-                                           value="<?= htmlspecialchars($home_data['second_button_text'] ?? '') ?>">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-purple-700 mb-1">Lien du bouton</label>
-                                    <input type="url" name="second_button_link" class="w-full p-2 border border-purple-200 rounded-md" 
-                                           value="<?= htmlspecialchars($home_data['second_button_link'] ?? '') ?>">
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Section CTA -->
                         <div class="space-y-4 p-4 bg-purple-50 rounded-lg">
